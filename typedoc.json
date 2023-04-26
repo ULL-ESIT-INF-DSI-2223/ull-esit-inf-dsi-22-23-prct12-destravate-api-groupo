@@ -1,0 +1,6 @@
+{
+  "entryPoints": [
+    "./src/pr-12/funkoapp.ts",    
+  ],
+  "out": "./docs" 
+}
