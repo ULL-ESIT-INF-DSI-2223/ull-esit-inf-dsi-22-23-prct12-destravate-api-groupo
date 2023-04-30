@@ -1,12 +1,12 @@
 {
-  "name": "practica-11",
+  "name": "practica-12",
   "version": "1.0.0",
   "description": "",
   "main": "funko.js",
   "scripts": {
     "test": "nyc mocha",
     "coverage": "nyc npm test && nyc report --reporter=lcov",
-    "start": "tsc-watch --onSuccess \"node dist/pr-12/funkoapp.js\"",
+    "start": "tsc-watch --onSuccess \"node dist/destravate.js\"",
     "doc": "typedoc"
   },
   "keywords": [],
@@ -38,6 +38,7 @@
     "inquirer": "^6.5.2",
     "lowdb": "^1.0.0",
     "mongodb": "^5.3.0",
+    "mongoose": "^7.0.5",
     "parseboolean": "^1.0.0",
     "prompt-sync": "^4.2.0",
     "request": "^2.88.2",
