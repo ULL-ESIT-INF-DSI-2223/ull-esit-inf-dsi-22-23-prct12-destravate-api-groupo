@@ -1,5 +1,7 @@
 import * as express from 'express';
 import { Track } from '../models/track'
+import { Challenge } from '../models/challenge';
+import { updateKms } from './challenge';
 
 export const trackRouter = express.Router();
 
@@ -116,24 +118,56 @@ trackRouter.delete('/', async (req, res) => {
     const track = await Track.findOneAndDelete({
       name: req.query.name.toString(),
     });
+    
     if (!track) {
       res.status(404).send();
     } else {
       res.send(track);
     }
-  } catch {
-    res.status(400).send();
-  }  
+
+    // Cuando se elimina una ruta, también lo hace del reto.
+    const trackChallenge = await Challenge.find({
+      tracks: track._id
+    });
+        
+    trackChallenge.forEach(async (item) => {
+      const index = item.tracks.indexOf(track._id);
+    
+      if (index > -1) {
+        item.tracks.splice(index, 1);
+        await item.save();
+      }
+      await updateKms(item, res);
+    });
+    } catch {
+      res.status(400).send();
+    }  
 });
 
 trackRouter.delete('/:id', async (req, res) => {
   try {
     const track = await Track.findByIdAndDelete(req.params.id);
+
     if (!track) {
       res.status(404).send();
     } else {
       res.send(track);
     }
+    
+    // Cuando se elimina una ruta, también lo hace del reto.
+    const trackChallenge = await Challenge.find({
+      tracks: track._id
+    });
+        
+    trackChallenge.forEach(async (item) => {
+      const index = item.tracks.indexOf(track._id);
+    
+      if (index > -1) {
+        item.tracks.splice(index, 1);
+        await item.save();
+      }
+      await updateKms(item, res);
+    });    
   } catch {
     res.status(400).send();
   }

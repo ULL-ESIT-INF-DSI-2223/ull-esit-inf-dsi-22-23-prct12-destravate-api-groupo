@@ -1,6 +1,6 @@
 {
   "entryPoints": [
-    "./src/pr-12/funkoapp.ts",    
+    "./src/routers/challenge.ts",    
   ],
   "out": "./docs" 
 }
