@@ -150,9 +150,7 @@ challengeRouter.delete('/', async (req, res) => {
     res.status(400).send();
   }  
 });
-/**
- * test
- */
+
 challengeRouter.delete('/:id', async (req, res) => {
   try {
     const challenge = await Challenge.findByIdAndDelete(req.params.id);

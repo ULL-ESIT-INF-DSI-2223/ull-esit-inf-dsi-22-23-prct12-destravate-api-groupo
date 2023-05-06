@@ -8,11 +8,11 @@ userRouter.get("/", async (req, res) => {
   const filter = req.query.name ? { name: req.query.name.toString() } : {};
   try {
     const users = await User.find(filter);
+
     if (users.length !== 0) {
-      res.send(users);
-    } else {
-      res.status(404).send();
-    }
+      return res.send(users);
+    }    
+    return res.status(404).send();    
   } catch {
     res.status(500).send();
   }
@@ -33,11 +33,12 @@ userRouter.get("/:id", async (req, res) => {
 
 userRouter.post("/", async (req, res) => {
   const user = new User(req.body);
+  console.log(user);
   try {
     await user.save();
-    res.status(201).send(user);
-  } catch {
-    res.status(500).send();
+    return res.status(201).send(user);
+  } catch (error) {
+    return res.status(500).send(error);
   }
 });
 
@@ -48,19 +49,9 @@ userRouter.patch("/", async (req, res) => {
     });
   }
 
-  const allowedUpdates = [
-    "name",
-    "activities",
-    "friends",
-    "groups",
-    "statistics",
-    "favoriteRoutes",
-    "activeChallenges",
-  ];
+  const allowedUpdates = ["name", "activity", "friends", "friendsGroups", "trainingStats", "favoriteTracks", "activeChallenges", "trackHistory"];
   const actualUpdates = Object.keys(req.body);
-  const isValidUpdate = actualUpdates.every((update) =>
-    allowedUpdates.includes(update)
-  );
+  const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
 
   if (!isValidUpdate) {
     return res.status(400).send({
@@ -85,20 +76,9 @@ userRouter.patch("/", async (req, res) => {
 });
 
 userRouter.patch("/:id", async (req, res) => {
-  const allowedUpdates = [
-    "name",
-    "activities",
-    "friends",
-    "friendsGroups",
-    "trainingStats",
-    "favoriteRoutes",
-    "activeChallenges",
-    "trackHistory",
-  ];
+  const allowedUpdates = ["name", "activity", "friends", "friendsGroups", "trainingStats", "favoriteTracks", "activeChallenges", "trackHistory"];
   const actualUpdates = Object.keys(req.body);
-  const isValidUpdate = actualUpdates.every((update) =>
-    allowedUpdates.includes(update)
-  );
+  const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
 
   if (!isValidUpdate) {
     return res.status(400).send({
@@ -137,18 +117,18 @@ userRouter.delete("/", async (req, res) => {
     res.send(user);
   } 
       // Cuando se elimina una usuario también lo hace de los grupos a los que pertenezca.
-      const userGroup = await Group.find({
-        members: user._id,
-      });
+      // const userGroup = await Group.find({
+      //   members: user._id,
+      // });
       
-      userGroup.forEach(async (item) => {
-        const index = item.members.indexOf(user._id);
+      // userGroup.forEach(async (item) => {
+      //   const index = item.members.indexOf(user._id);
   
-        if (index > -1) {
-          item.members.splice(index, 1);
-          await item.save();
-        }
-      });
+      //   if (index > -1) {
+      //     item.members.splice(index, 1);
+      //     await item.save();
+      //   }
+      // });
 
     } catch {
     res.status(400).send();
@@ -165,18 +145,18 @@ userRouter.delete("/:id", async (req, res) => {
     }
 
     // Cuando se elimina una usuario también lo hace de los grupos a los que pertenezca.
-    const userGroup = await Group.find({
-      members: user._id,
-    });
+    // const userGroup = await Group.find({
+    //   members: user._id,
+    // });
     
-    userGroup.forEach(async (item) => {
-      const index = item.members.indexOf(user._id);
+    // userGroup.forEach(async (item) => {
+    //   const index = item.members.indexOf(user._id);
 
-      if (index > -1) {
-        item.members.splice(index, 1);
-        await item.save();
-      }
-    });
+    //   if (index > -1) {
+    //     item.members.splice(index, 1);
+    //     await item.save();
+    //   }
+    // });
 
   } catch {
     res.status(400).send();

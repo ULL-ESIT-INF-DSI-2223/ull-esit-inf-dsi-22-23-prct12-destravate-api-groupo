@@ -12,7 +12,6 @@ groupRouter.get("/", async (req, res) => {
     if (groups.length !== 0) {
       return res.send(groups);
     }
-
     return res.status(404).send();
   } catch (error) {
     return res.status(500).send(error);
@@ -26,7 +25,6 @@ groupRouter.get("/:id", async (req, res) => {
     if (group) {
       return res.send(group);
     }
-
     return res.status(404).send();
   } catch (error) {
     return res.status(500).send(error);

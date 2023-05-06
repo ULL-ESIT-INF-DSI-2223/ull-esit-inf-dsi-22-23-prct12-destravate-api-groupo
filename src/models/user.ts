@@ -1,16 +1,15 @@
-import { Document, model, Schema } from "mongoose";
+import mongoose, { Document, model, Schema } from "mongoose";
 import { TrackDocumentInterface } from './track';
 import { ChallengeDocumentInterface } from './challenge';
 
-
 export interface UserDocumentInterface extends Document {
-  id: string;
+  _id: string;
   name: string;
   activity: "bike" | "running";
   friends: UserDocumentInterface[];
-  friendGroups: {
+  friendsGroups: {
     name: string;
-    friends: string[];
+    friends: UserDocumentInterface[];
   }[];
   trainingStats: {
     weekly: {
@@ -23,45 +22,43 @@ export interface UserDocumentInterface extends Document {
     };
     yearly: {
       length: number;
-      unevenness: number;trackHistory: {
-        track: TrackDocumentInterface;
-        date: Date;
-      }[];
+      unevenness: number;
     };
   };
   favoriteTracks: TrackDocumentInterface[];
   activeChallenges: ChallengeDocumentInterface[];
   trackHistory: {
-    track: TrackDocumentInterface;
-    date: Date;
+    tracks: TrackDocumentInterface[];
+    date: string;
   }[];
 }
 
 export const UserSchema = new Schema<UserDocumentInterface>({
-  id: {
+  _id: {
     type: String,
-    required: true,
-    unique: true,
+    required: false,
+    auto: true,
+    default: () => new mongoose.Types.ObjectId().toString()
   },
   name: {
     type: String,
     required: true,
+    unique: true
   },
-  activity: [
-    {
+  activity: {
       type: String,
       required: true,
-      enum: ["run", "bike"],
-    },
-  ],
+      enum: ["running", "bike"],
+  },
   friends: [
     {
       type: Schema.Types.ObjectId,
-      required: true,
+      required: false,
       ref: "User",
+      default: []
     },
   ],
-  friendGroups: [
+  friendsGroups: [
     {
       name: {
         type: String,
@@ -69,8 +66,10 @@ export const UserSchema = new Schema<UserDocumentInterface>({
       },
       friends: [
         {
-          type: String,
-          required: true,
+          type: Schema.Types.ObjectId,
+          required: false,
+          default: [],
+          ref: "User"
         },
       ],
     },
@@ -123,13 +122,13 @@ export const UserSchema = new Schema<UserDocumentInterface>({
   ],
   trackHistory: [
     {
-      routeId: {
+      tracks: [{
         type: Schema.Types.ObjectId,
         required: true,
         ref: "Track",
-      },
+      }],
       date: {
-        type: Date,
+        type: String,
         required: true,
       },
     },
