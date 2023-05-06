@@ -1,6 +1,7 @@
 {
   "entryPoints": [
     "./src/routers/challenge.ts",    
+    "./src/routers/tracks.ts"
   ],
   "out": "./docs" 
 }
