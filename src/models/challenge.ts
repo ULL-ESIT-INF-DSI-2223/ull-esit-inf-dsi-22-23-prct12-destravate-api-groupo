@@ -1,65 +1,34 @@
 import { Document, model, Schema } from 'mongoose';
+import { TrackDocumentInterface } from './track';
 //import validator from 'validator';
 
-export interface TrackDocumentInterface extends Document {
+export interface ChallengeDocumentInterface extends Document {
   name: string,
-  startGeolocation: {
-    latitude: string,
-    longitude: string
-  },
-  endGeolocation: {
-    latitude: string,
-    longitude: string
-  },
-  length: number,
-  unevenness: number,  
+  tracks: TrackDocumentInterface[],
   activity: 'bike' | 'running',
-  rating: number
+  kms: number,
 }
 
-export const TrackSchema = new Schema<TrackDocumentInterface>({
+export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
   name: {
     type: String,
     required: true,
     unique: true
   },
-  startGeolocation: {
-    latitude: {
-      type: String,
-      required: true,
-    },
-    longitude: {
-      type: String,
-      required: true,
-    }
-  },
-  endGeolocation: {
-    latitude: {
-      type: String,
-      required: true,
-    },
-    longitude: {
-      type: String,
-      required: true,
-    }
-  },
-  length: {
-    type: Number,
+  tracks: [{
+    type: Schema.Types.ObjectId,
     required: true,
-  },
-  unevenness: {
-    type: Number,
-    required: true,
-  },
+    ref: 'Track'
+  }],
   activity: {
     type: String,
     required: true,
     enum: ['bike', 'running'],
   },
-  rating: {
+  kms: {
     type: Number,
-    required: true,
+    required: false,
   }
 });
 
-export const Track = model<TrackDocumentInterface>('Track', TrackSchema);
+export const Challenge = model<ChallengeDocumentInterface>('Challenge', ChallengeSchema);
