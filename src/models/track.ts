@@ -1,5 +1,5 @@
 import { Document, model, Schema } from 'mongoose';
-//import validator from 'validator';
+import * as validator from 'validator';
 
 export interface TrackDocumentInterface extends Document {
   name: string,
@@ -21,7 +21,14 @@ export const TrackSchema = new Schema<TrackDocumentInterface>({
   name: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    validate: (value: string) => {
+      if (!value.match(/^[A-Z]/)) {
+        throw new Error('Track name must start with a capital letter');
+      } else if (!validator.default.isAlphanumeric(value)) {
+        throw new Error('Track name must contain alphanumeric characters only')
+      }
+    }
   },
   startGeolocation: {
     latitude: {

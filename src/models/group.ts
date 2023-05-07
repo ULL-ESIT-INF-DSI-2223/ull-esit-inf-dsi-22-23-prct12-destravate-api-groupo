@@ -1,6 +1,7 @@
-import mongoose, { Document, model, Schema } from "mongoose";
+import { Document, model, Schema } from "mongoose";
 import { TrackDocumentInterface } from "./track";
 import { UserDocumentInterface } from "./user";
+import * as validator from 'validator';
 
 export interface GroupDocumentInterface extends Document {
   name: string;
@@ -34,6 +35,14 @@ const GroupSchema = new Schema<GroupDocumentInterface>({
   name: {
     type: String,
     required: true,
+    unique: true,
+    validate: (value: string) => {
+      if (!value.match(/^[A-Z]/)) {
+        throw new Error('Group name must start with a capital letter');
+      } else if (!validator.default.isAlphanumeric(value)) {
+        throw new Error('Group name must contain alphanumeric characters only')
+      }
+    }
   },
   members: [
     {
@@ -101,98 +110,15 @@ const GroupSchema = new Schema<GroupDocumentInterface>({
     {
       tracks: [{
         type: Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: "Track",
       }],
       date: {
         type: String,
-        required: true,
+        required: false,
       },
     },
   ],
 });
-
-
-// const GroupSchema = new Schema<GroupDocumentInterface>({
-//   name: {
-//     type: String,
-//     required: true,
-//   },
-//   members: [
-//     {
-//       type: Schema.Types.ObjectId,
-//       required: true,
-//       ref: "User",
-//     },
-//   ],
-//   groupStats: {
-//     weekly: {
-//       length: {
-//         type: Number,
-//         default: 0,
-//       },
-//       unevenness: {
-//         type: Number,
-//         default: 0,
-//       },
-//     },
-//     monthly: {
-//       length: {
-//         type: Number,
-//         default: 0,
-//       },
-//       unevenness: {
-//         type: Number,
-//         default: 0,
-//       },
-//     },
-//     yearly: {
-//       length: {
-//         type: Number,
-//         default: 0,
-//       },
-//       unevenness: {
-//         type: Number,
-//         default: 0,
-//       },
-//     },
-//   },
-//   ranking: {
-//     byLenght: [
-//       {
-//         type: Schema.Types.ObjectId,
-//         required: false,
-//         ref: "User",
-//       },
-//     ],
-//     byUnevenness: [
-//       {
-//         type: Schema.Types.ObjectId,
-//         required: false,
-//         ref: "User",
-//       },
-//     ],
-//   },
-//   favoriteTracks: [
-//      {
-//         type: Schema.Types.ObjectId,
-//         required: true,
-//         ref: "Track",
-//       },
-//     ],
-//   trackHistory: [
-//     {
-//       tracks: [{
-//         type: Schema.Types.ObjectId,
-//         required: true,
-//         ref: "Track",
-//       }],
-//       date: {
-//         type: String,
-//         required: true,
-//       },
-//     },
-//   ],
-// });
 
 export const Group = model<GroupDocumentInterface>("Group", GroupSchema);

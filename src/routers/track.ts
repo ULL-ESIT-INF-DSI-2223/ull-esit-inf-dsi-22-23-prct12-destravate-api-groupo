@@ -81,31 +81,31 @@ trackRouter.patch('/', async (req, res) => {
 });
 
 trackRouter.patch('/:id', async (req, res) => {  
-    const allowedUpdates = ['name', 'startGeolocation', 'endGeolocation', 'length', 'unevenness', 'activity', 'rating'];
-    const actualUpdates = Object.keys(req.body);
-    const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
+  const allowedUpdates = ['name', 'startGeolocation', 'endGeolocation', 'length', 'unevenness', 'activity', 'rating'];
+  const actualUpdates = Object.keys(req.body);
+  const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
 
-    if (!isValidUpdate) {
-      return res.status(400).send({
-        error: 'Update is not permitted',
-      });
+  if (!isValidUpdate) {
+    return res.status(400).send({
+      error: 'Update is not permitted',
+    });
+  }
+
+  try {
+    const track = await Track.findByIdAndUpdate(req.params.id,
+    req.body,
+    {
+      new: true,
+      runValidators: true
+    });
+
+    if (track) {
+      return res.send(track);
     }
-
-    try {
-      const track = await Track.findByIdAndUpdate(req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      });
-
-      if (track) {
-        return res.send(track);
-      }
-      return res.status(404).send();
-    } catch (error) {
-      return res.status(500).send(error);
-    }
+    return res.status(404).send();
+  } catch (error) {
+    return res.status(500).send(error);
+  }
 });
 
 trackRouter.delete('/', async (req, res) => {
@@ -120,7 +120,7 @@ trackRouter.delete('/', async (req, res) => {
     });
     
     if (!track) {
-      res.status(404).send();
+      return res.status(404).send();
     } else {
       res.send(track);
     }
@@ -139,8 +139,8 @@ trackRouter.delete('/', async (req, res) => {
       }
       await updateKms(item, res);
     });
-    } catch {
-      res.status(400).send();
+    } catch (error) {
+      return res.status(500).send(error);
     }  
 });
 
@@ -149,7 +149,7 @@ trackRouter.delete('/:id', async (req, res) => {
     const track = await Track.findByIdAndDelete(req.params.id);
 
     if (!track) {
-      res.status(404).send();
+      return res.status(404).send();
     } else {
       res.send(track);
     }
@@ -168,7 +168,7 @@ trackRouter.delete('/:id', async (req, res) => {
       }
       await updateKms(item, res);
     });    
-  } catch {
-    res.status(400).send();
+  } catch (error) {
+    return res.status(500).send(error);
   }
 });

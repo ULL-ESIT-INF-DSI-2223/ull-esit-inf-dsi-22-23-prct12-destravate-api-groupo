@@ -24,7 +24,6 @@ export async function updateKms(challenge, res) {
   await challenge.save();
 }
 
-
 challengeRouter.get('/',  async (req, res) => {
   const filter = req.query.name?{name: req.query.name.toString()}:{};
 
@@ -71,7 +70,7 @@ challengeRouter.patch('/', async (req, res) => {
     });
   } 
 
-  const allowedUpdates = ['name', 'tracks', 'activity'];
+  const allowedUpdates = ['name', 'tracks', 'activity', 'users'];
   const actualUpdates = Object.keys(req.body);
   const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
 
@@ -141,25 +140,27 @@ challengeRouter.delete('/', async (req, res) => {
     const challenge = await Challenge.findOneAndDelete({
       name: req.query.name.toString(),
     });
+
     if (!challenge) {
-      res.status(404).send();
+      return res.status(404).send();
     } else {
       res.send(challenge);
     }
-  } catch {
-    res.status(400).send();
+  } catch (error) {
+    return res.status(500).send(error);
   }  
 });
 
 challengeRouter.delete('/:id', async (req, res) => {
   try {
     const challenge = await Challenge.findByIdAndDelete(req.params.id);
+
     if (!challenge) {
-      res.status(404).send();
+      return res.status(404).send();
     } else {
       res.send(challenge);
     }
-  } catch {
-    res.status(400).send();
+  } catch (error) {
+    return res.status(500).send(error);
   }
 });

@@ -1,6 +1,7 @@
 import mongoose, { Document, model, Schema } from "mongoose";
 import { TrackDocumentInterface } from './track';
 import { ChallengeDocumentInterface } from './challenge';
+import * as validator from 'validator';
 
 export interface UserDocumentInterface extends Document {
   _id: string;
@@ -43,7 +44,14 @@ export const UserSchema = new Schema<UserDocumentInterface>({
   name: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    validate: (value: string) => {
+      if (!value.match(/^[A-Z]/)) {
+        throw new Error('User name must start with a capital letter');
+      } else if (!validator.default.isAlphanumeric(value)) {
+        throw new Error('User name must contain alphanumeric characters only')
+      }
+    }
   },
   activity: {
       type: String,
