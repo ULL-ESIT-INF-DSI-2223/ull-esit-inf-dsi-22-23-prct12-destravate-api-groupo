@@ -1,12 +1,24 @@
 # Práctica 12 - Destravate: API Node/Express
-Esta práctica consiste en 
+Esta práctica consiste en la realización de una API REST, realizada mediante el uso de Node/Express, que nos perminte hacer las opereciones CRUD (_Create_, _Read_, _Update_, _Delete_), para registar actividades deportivas.
 \
 \
-El código fuente de ambos ejercicios se encuentra organizado en diferentes directorios y se hace uso de sintaxis ES para importar/exportar las distintas entidades.
+Esta práctica se ha realizado en grupo por los siguientes alumnos:
+- Pablo de la Fuente Rodríguez (alu0101336152@ull.edu.es)
+- José David Mur Álvarez (alu0101052168@ull.edu.es)
+- Carlos Pío Reyes (alu0101132945@ull.edu.es)
+\
+\
+El código fuente del proyecto se encuentra organizado en diferentes directorios y se hace uso de sintaxis ES para importar/exportar las distintas entidades.
+## Requisitos del sistema
+Para la creación de este sistema se proponen 4 elementos fundamentales: _Tracks_, Usuarios, Grupos y Retos.
+
 ## Ejercicio de clase
 
 ## Conclusión
-En esta práctica hemos 
+Con la realización de este proyecto hemos aprendido a crear nuestra propia API REST, lo cual es fundamental en el desarrollo de aplicaciones, permitiendo que diferentes sistemas y aplicaciones se comuniquen de manera eficiente. También cómo se relaciona esta con una base de datos, en nuestro caso mongoose, donde hemos implementado las 4 funciones basicas (inserción, consulta, borrado y modificación). También hemos implementado el uso de async/await, lo que nos permite trabajar con código asíncrono de manera más legible.
+\
+\
+Finalmente hemos podido consolidar los conocimientos relacionados con el servidor Express y el uso de las peticiones HTTP para llevar a cabo las operaciones anteriormente mencionadas (POST, GET, DELETE, PATCH)
 \
 \
 Al igual que en las prácticas anteriores se han incluido los flujos de trabajo de GitHub Actions:
@@ -15,3 +27,7 @@ Al igual que en las prácticas anteriores se han incluido los flujos de trabajo 
 ## Bibliografía
 Para la realización de esta práctica se han consultado las siguientes fuentes bibliográficas:
 * [Guion de la práctica 12](https://ull-esit-inf-dsi-2223.github.io/prct12-destravate-api/)
+* [Apuntes API REST](https://ull-esit-inf-dsi-2223.github.io/nodejs-theory/nodejs-rest-api.html)
+* [Apuntes Async/Await](https://ull-esit-inf-dsi-2223.github.io/nodejs-theory/nodejs-rest-api-async-await.html)
+* [Apuntes Pruebas en la API REST](https://ull-esit-inf-dsi-2223.github.io/nodejs-theory/nodejs-rest-api-testing.html)
+* [Apuntes Despliegue del API REST](https://ull-esit-inf-dsi-2223.github.io/nodejs-theory/nodejs-deployment.html)

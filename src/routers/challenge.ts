@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { Track } from '../models/track'
 import { Challenge } from '../models/challenge';
+import { User } from '../models/user'
 
 export const challengeRouter = express.Router();
 
@@ -54,6 +55,22 @@ challengeRouter.get('/:id', async (req, res) => {
 
 challengeRouter.post('/', async (req, res) => {
   const challenge = new Challenge(req.body);
+
+  // Comprobar que los tracks existen en la base de datos.
+  for (let i = 0; i < challenge.tracks.length; i++) {
+    const checkTrack = await Track.findById(challenge.tracks[i]);
+    if (!checkTrack) {
+      return res.status(404).send({error: "Any track is not in the database"})
+    }
+  }
+
+  // Comprobar que los usuarios existen en la base de datos.
+  for (let i = 0; i < challenge.users.length; i++) {
+    const checkUser = await User.findById(challenge.users[i]);
+    if (!checkUser) {
+      return res.status(404).send({error: "Any user is not in the database"})
+    }
+  }
   
   try {
     await updateKms(challenge, res);
@@ -90,8 +107,25 @@ challengeRouter.patch('/', async (req, res) => {
       runValidators: true
     });
 
-    if (challenge) {
-      await updateKms(challenge, res);      
+    if (challenge) { 
+      
+      // Comprobar que los tracks existen en la base de datos.
+      for (let i = 0; i < challenge.tracks.length; i++) {
+        const checkTrack = await Track.findById(challenge.tracks[i]);
+        if (!checkTrack) {
+          return res.status(404).send({error: "Any track is not in the database"})
+        }
+      }
+
+      // Comprobar que los usuarios existen en la base de datos.
+      for (let i = 0; i < challenge.users.length; i++) {
+        const checkUser = await User.findById(challenge.users[i]);
+        if (!checkUser) {
+          return res.status(404).send({error: "Any user is not in the database"})
+        }
+      }      
+      
+      await updateKms(challenge, res);  
       return res.send(challenge);
     }
     return res.status(404).send();
@@ -101,7 +135,7 @@ challengeRouter.patch('/', async (req, res) => {
 });
 
 challengeRouter.patch('/:id', async (req, res) => {  
-  const allowedUpdates = ['name', 'tracks', 'activity'];
+  const allowedUpdates = ['name', 'tracks', 'activity', 'users'];
   const actualUpdates = Object.keys(req.body);
   const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
 
@@ -120,6 +154,23 @@ challengeRouter.patch('/:id', async (req, res) => {
     });
 
     if (challenge) {
+
+      // Comprobar que los tracks existen en la base de datos.
+      for (let i = 0; i < challenge.tracks.length; i++) {
+        const checkTrack = await Track.findById(challenge.tracks[i]);
+        if (!checkTrack) {
+          return res.status(404).send({error: "Any track is not in the database"})
+        }
+      }
+
+      // Comprobar que los usuarios existen en la base de datos.
+      for (let i = 0; i < challenge.users.length; i++) {
+        const checkUser = await User.findById(challenge.users[i]);
+        if (!checkUser) {
+          return res.status(404).send({error: "Any user is not in the database"})
+        }
+      }  
+
       await updateKms(challenge, res);  
       return res.send(challenge);
     }
@@ -146,6 +197,21 @@ challengeRouter.delete('/', async (req, res) => {
     } else {
       res.send(challenge);
     }
+
+    // Cuando se elimina un reto, también lo hace de los retos activos del usuario.
+    const challengeUser = await User.find({
+      activeChallenges: challenge._id
+    });
+        
+    challengeUser.forEach(async (item) => {
+      const index = item.activeChallenges.indexOf(challenge._id);
+    
+      if (index > -1) {
+        item.activeChallenges.splice(index, 1);
+        await item.save();
+      }
+    });
+
   } catch (error) {
     return res.status(500).send(error);
   }  
@@ -160,6 +226,21 @@ challengeRouter.delete('/:id', async (req, res) => {
     } else {
       res.send(challenge);
     }
+
+    // Cuando se elimina un reto, también lo hace de los retos activos del usuario.
+    const challengeUser = await User.find({
+      activeChallenges: challenge._id
+    });
+        
+    challengeUser.forEach(async (item) => {
+      const index = item.activeChallenges.indexOf(challenge._id);
+    
+      if (index > -1) {
+        item.activeChallenges.splice(index, 1);
+        await item.save();
+      }
+    });
+
   } catch (error) {
     return res.status(500).send(error);
   }

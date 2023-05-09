@@ -1,6 +1,8 @@
 import * as express from 'express';
 import { Track } from '../models/track'
 import { Challenge } from '../models/challenge';
+import { User } from '../models/user';
+import { Group } from '../models/group';
 import { updateKms } from './challenge';
 
 export const trackRouter = express.Router();
@@ -139,6 +141,35 @@ trackRouter.delete('/', async (req, res) => {
       }
       await updateKms(item, res);
     });
+
+    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del usuario.
+    const trackUser = await User.find({
+      favoriteTracks: track._id
+    });
+        
+    trackUser.forEach(async (item) => {
+      const index = item.favoriteTracks.indexOf(track._id);
+    
+      if (index > -1) {
+        item.favoriteTracks.splice(index, 1);
+        await item.save();
+      }
+    });
+
+    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del grupo.
+    const trackGroup = await Group.find({
+      favoriteTracks: track._id
+    });
+        
+    trackGroup.forEach(async (item) => {
+      const index = item.favoriteTracks.indexOf(track._id);
+    
+      if (index > -1) {
+        item.favoriteTracks.splice(index, 1);
+        await item.save();
+      }
+    });
+
     } catch (error) {
       return res.status(500).send(error);
     }  
@@ -168,6 +199,35 @@ trackRouter.delete('/:id', async (req, res) => {
       }
       await updateKms(item, res);
     });    
+
+    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del usuario.
+    const trackUser = await User.find({
+      favoriteTracks: track._id
+    });
+        
+    trackUser.forEach(async (item) => {
+      const index = item.favoriteTracks.indexOf(track._id);
+    
+      if (index > -1) {
+        item.favoriteTracks.splice(index, 1);
+        await item.save();
+      }
+    });
+
+    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del grupo.
+    const trackGroup = await Group.find({
+      favoriteTracks: track._id
+    });
+        
+    trackGroup.forEach(async (item) => {
+      const index = item.favoriteTracks.indexOf(track._id);
+    
+      if (index > -1) {
+        item.favoriteTracks.splice(index, 1);
+        await item.save();
+      }
+    });
+
   } catch (error) {
     return res.status(500).send(error);
   }

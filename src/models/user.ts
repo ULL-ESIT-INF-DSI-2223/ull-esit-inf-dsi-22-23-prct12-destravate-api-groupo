@@ -138,6 +138,11 @@ export const UserSchema = new Schema<UserDocumentInterface>({
       date: {
         type: String,
         required: true,
+        validate: (value: string) => {
+          if (!value.match(/^([0-9]{2})-([0-9]{2})-([0-9]{4})$/)) {
+            throw new Error('Date must have this format: DD-MM-YYYY');
+          }
+        }
       },
     },
   ],
