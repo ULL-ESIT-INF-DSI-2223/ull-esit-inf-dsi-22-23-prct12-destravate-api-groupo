@@ -11,18 +11,18 @@ describe('POST /tracks', () => {
   it('Should successfully create a new track', async () => {
     await request(app).post('/tracks').send({
       startGeolocation: {
-        latitude: "28.3141 N",
-        longitude: "16.5538 W"
+        latitude: "1.54",
+        longitude: "2.32"
       },
       endGeolocation: {
-        latitude: "28.2186 N",
-        longitude: "16.7172 W"
+        latitude: "6.43",
+        longitude: "7.12"
       },
-      name: "Ruta de los volcanes",
+      name: "Ruta 87",
       length: 12,
       unevenness: 20,
       activity: "bike",
-      rating: 7.2
+      rating: 6.8
     }).expect(201);
   });
 });

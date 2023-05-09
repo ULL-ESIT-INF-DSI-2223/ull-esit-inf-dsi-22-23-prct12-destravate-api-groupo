@@ -25,8 +25,8 @@ export const TrackSchema = new Schema<TrackDocumentInterface>({
     validate: (value: string) => {
       if (!value.match(/^[A-Z]/)) {
         throw new Error('Track name must start with a capital letter');
-      } else if (!validator.default.isAlphanumeric(value)) {
-        throw new Error('Track name must contain alphanumeric characters only')
+      } else if (!validator.default.isAlphanumeric(value.replace(/\s/g, ''))) {
+        throw new Error('Track name must contain alphanumeric characters and spaces only')
       }
     }
   },
