@@ -7,22 +7,60 @@ beforeEach(async () => {
   await Track.deleteMany();
 });
 
+
+
 describe('POST /tracks', () => {
   it('Should successfully create a new track', async () => {
     await request(app).post('/tracks').send({
       startGeolocation: {
-        latitude: "1.54",
-        longitude: "2.32"
+        latitude: "28.3141 N",
+        longitude: "16.5538 W"
       },
       endGeolocation: {
-        latitude: "6.43",
-        longitude: "7.12"
+        latitude: "28.2186 N",
+        longitude: "16.7172 W"
       },
-      name: "Ruta 87",
+      name: "Ruta de los volcanes",
       length: 12,
       unevenness: 20,
       activity: "bike",
-      rating: 6.8
+      rating: 7.2
     }).expect(201);
+  });
+
+  it('Should throw an 500 error when creating a track', async () => {
+    await request(app).post('/tracks').send({
+      startGeolocation: {
+        latitude: "28.3141 N",
+        longitude: "16.5538 W"
+      },
+      endGeolocation: {
+        latitude: "28.2186 N",
+        longitude: "16.7172 W"
+      },
+      name: "Ruta de los -----",
+      length: -8,
+      unevenness: -4,
+      activity: "running",
+      rating: 13
+    }).expect(500);
+  });
+
+  it('Should throw an 404 error when creating a track', async () => {
+    await request(app).post('/trac').send({
+      startGeolocation: {
+        latitude: "28.3141 N",
+        longitude: "16.5538 W"
+      },
+      endGeolocation: {
+        latitude: "28.2186 N",
+        longitude: "16.7172 W"
+      },
+      name: "Ruta de los volcanes",
+      length: 12,
+      unevenness: 20,
+      activity: "bike",
+      rating: 3
+    }).expect(404);
   });
 });

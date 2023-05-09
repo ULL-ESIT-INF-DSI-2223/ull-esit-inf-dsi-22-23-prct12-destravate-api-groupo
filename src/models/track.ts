@@ -53,10 +53,20 @@ export const TrackSchema = new Schema<TrackDocumentInterface>({
   length: {
     type: Number,
     required: true,
+    validate(value: number) {
+      if (value < 0) {
+        throw new Error('Unevenness must be greater than 0');
+      }
+    } 
   },
   unevenness: {
     type: Number,
     required: true,
+    validate(value: number) {
+      if (value < 0) {
+        throw new Error('Unevenness must be greater than 0');
+      }
+    } 
   },
   activity: {
     type: String,
@@ -66,6 +76,11 @@ export const TrackSchema = new Schema<TrackDocumentInterface>({
   rating: {
     type: Number,
     required: true,
+    validate(value: number) {
+      if (value <= 0 || value > 10) {
+        throw new Error('Rating must be greater than or equal to 0 and lower than or equal to 10');
+      }
+    }    
   }
 });
 
