@@ -3,10 +3,10 @@ import { app } from '../src/app';
 import { Track } from '../src/models/track';
 import { expect } from 'chai';
 
-beforeEach(async () => {
-  await Track.deleteMany();
-  //await new User(firstUser).save();
-});
+// beforeEach(async () => {
+//   await Track.deleteMany();
+//   //await new User(firstUser).save();
+// });
 
 describe('POST /tracks', () => {
   it('Should successfully create a new track', async () => {
