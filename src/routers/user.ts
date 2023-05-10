@@ -6,13 +6,13 @@ import { Challenge } from "../models/challenge";
 
 export const userRouter = express.Router();
 
-export async function checkErrors(user, res) {
+export async function checkItemsExists(user) {
 
   // Comprobar que los amigos existen en la base de datos.
   for (let i = 0; i < user.friends.length; i++) {
     const checkUser = await User.findById(user.friends[i]);
     if (!checkUser) {
-      return res.status(404).send({error: "Any friend is not in the database"})
+      throw new Error("Any friend is not in the database")      
     }
   }
 
@@ -21,7 +21,7 @@ export async function checkErrors(user, res) {
     for (let j = 0; j < user.friendsGroups[i].friends.length; j++) {
       const checkUser = await User.findById(user.friendsGroups[i].friends[j]);
       if (!checkUser) {
-        return res.status(404).send({error: 'Any friend in friendsGroup is not in the database'})
+        throw new Error("Any friend in friendsGroup is not in the database")            
       }
     }
   }
@@ -30,7 +30,7 @@ export async function checkErrors(user, res) {
   for (let i = 0; i < user.favoriteTracks.length; i++) {
     const checkTrack = await Track.findById(user.favoriteTracks[i]);
     if (!checkTrack) {
-      return res.status(404).send({error: "Any track in favoriteTracks is not in the database"})
+      throw new Error("Any track in favoriteTracks is not in the database")           
     }
   }
 
@@ -38,7 +38,7 @@ export async function checkErrors(user, res) {
   for (let i = 0; i < user.activeChallenges.length; i++) {
     const checkChallenge = await Challenge.findById(user.activeChallenges[i]);
     if (!checkChallenge) {
-      return res.status(404).send({error: "Any challenge in activeChallenges is not in the database"})
+      throw new Error("Any challenge in activeChallenges is not in the database")        
     }
   }
 
@@ -47,10 +47,55 @@ export async function checkErrors(user, res) {
     for (let j = 0; j < user.trackHistory[i].tracks.length; j++) {
       const checkTrack = await Track.findById(user.trackHistory[i].tracks[j]);
       if (!checkTrack) {
-        return res.status(404).send({error: 'Any track in trackHistory is not in the database'})
+        throw new Error("Any track in trackHistory is not in the database")        
       }
     }
   }
+}
+
+export async function deleteInOtherObjects(user) {
+
+  // Cuando se elimina un usuario también lo hace de los grupos a los que pertenezca.
+  const userGroup = await Group.find({
+    members: user._id,
+  });
+      
+  userGroup.forEach(async (item) => {
+    const index = item.members.indexOf(user.id);
+
+    if (index > -1) {
+      item.members.splice(index, 1);
+      await item.save();
+    }
+  });
+
+  // Cuando se elimina un usuario también lo hace de los amigos de otros usuarios.
+  const userFriends = await User.find({
+    friends: user._id,
+  });
+      
+  userFriends.forEach(async (item) => {
+    const index = item.friends.indexOf(user.id);
+
+    if (index > -1) {
+      item.friends.splice(index, 1);
+      await item.save();
+    }
+  });
+
+    // Cuando se elimina un usuario también lo hace de los grupos de amigos de otros usuarios.
+    const userFriendsGroup = await User.find({
+      friendsGroups: user._id,
+    });
+        
+    userFriendsGroup.forEach(async (item) => {
+      const index = item.friendsGroups.indexOf(user.id);
+  
+      if (index > -1) {
+        item.friendsGroups.splice(index, 1);
+        await item.save();
+      }
+    });
 }
 
 userRouter.get('/', async (req, res) => {
@@ -84,57 +129,12 @@ userRouter.get('/:id', async (req, res) => {
 userRouter.post('/', async (req, res) => {
   const user = new User(req.body);
 
-  //await checkErrors(user, res)
-
-  // Comprobar que los amigos existen en la base de datos.
-  for (let i = 0; i < user.friends.length; i++) {
-    const checkUser = await User.findById(user.friends[i]);
-    if (!checkUser) {
-      return res.status(404).send({error: "Any friend is not in the database"})
-    }
-  }
-
-  // Comprobar que los amigos dentro de grupo de amigos existen en la base de datos.
-  for (let i = 0; i < user.friendsGroups.length; i++) {
-    for (let j = 0; j < user.friendsGroups[i].friends.length; j++) {
-      const checkUser = await User.findById(user.friendsGroups[i].friends[j]);
-      if (!checkUser) {
-        return res.status(404).send({error: 'Any friend in friendsGroup is not in the database'})
-      }
-    }
-  }
-
-  // Comprobar que las rutas favoritas del usuario existen en la base de datos.
-  for (let i = 0; i < user.favoriteTracks.length; i++) {
-    const checkTrack = await Track.findById(user.favoriteTracks[i]);
-    if (!checkTrack) {
-      return res.status(404).send({error: "Any track in favoriteTracks is not in the database"})
-    }
-  }
-
-  // Comprobar que los retos activos del usuario existen en la base de datos.
-  for (let i = 0; i < user.activeChallenges.length; i++) {
-    const checkChallenge = await Challenge.findById(user.activeChallenges[i]);
-    if (!checkChallenge) {
-      return res.status(404).send({error: "Any challenge in activeChallenges is not in the database"})
-    }
-  }
-
-  // Comprobar que las rutas dentro del historial de rutas existen en la base de datos.
-  for (let i = 0; i < user.trackHistory.length; i++) {
-    for (let j = 0; j < user.trackHistory[i].tracks.length; j++) {
-      const checkTrack = await Track.findById(user.trackHistory[i].tracks[j]);
-      if (!checkTrack) {
-        return res.status(404).send({error: 'Any track in trackHistory is not in the database'})
-      }
-    }
-  }
-
   try {
+    await checkItemsExists(user);
     await user.save();
     return res.status(201).send(user);
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send({error: error.message});
   }
 });
 
@@ -166,30 +166,12 @@ userRouter.patch('/', async (req, res) => {
     );
 
     if (user) {
-
-      // Comprobar que los amigos existen en la base de datos.
-      for (let i = 0; i < user.friends.length; i++) {
-        const checkUser = await User.findById(user.friends[i]);
-        if (!checkUser) {
-          return res.status(404).send({error: "Any friend is not in the database"})
-        }
-      }
-
-      // Comprobar que los amigos dentro de grupo de amigos existen en la base de datos.
-      for (let i = 0; i < user.friendsGroups.length; i++) {
-        for (let j = 0; j < user.friendsGroups[i].friends.length; j++) {
-          const checkUser = await User.findById(user.friendsGroups[i].friends[j]);
-          if (!checkUser) {
-            return res.status(404).send({error: 'Any friend in friendsGroup is not in the database'})
-          }
-        }
-      }
-
+      await checkItemsExists(user);
       return res.send(user);
     }
     return res.status(404).send();
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send({error: error.message});
   }
 });
 
@@ -213,30 +195,12 @@ userRouter.patch('/:id', async (req, res) => {
     });
 
     if (user) {
-
-      // Comprobar que los amigos existen en la base de datos.
-      for (let i = 0; i < user.friends.length; i++) {
-        const checkUser = await User.findById(user.friends[i]);
-        if (!checkUser) {
-          return res.status(404).send({error: "Any friend is not in the database"})
-        }
-      }
-
-      // Comprobar que los amigos dentro de grupo de amigos existen en la base de datos.
-      for (let i = 0; i < user.friendsGroups.length; i++) {
-        for (let j = 0; j < user.friendsGroups[i].friends.length; j++) {
-          const checkUser = await User.findById(user.friendsGroups[i].friends[j]);
-          if (!checkUser) {
-            return res.status(404).send({error: 'Any friend in friendsGroup is not in the database'})
-          }   
-        }
-      }
-
+      await checkItemsExists(user);
       return res.send(user);
     }
     return res.status(404).send();
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send({error: error.message});
   }
 });
 
@@ -257,19 +221,7 @@ userRouter.delete('/', async (req, res) => {
       res.send(user);
     } 
 
-    // Cuando se elimina una usuario también lo hace de los grupos a los que pertenezca.
-    const userGroup = await Group.find({
-      members: user._id,
-    });
-      
-    userGroup.forEach(async (item) => {
-      const index = item.members.indexOf(user.id);
-  
-      if (index > -1) {
-        item.members.splice(index, 1);
-        await item.save();
-      }
-    });
+    await deleteInOtherObjects(user);
 
     } catch (error) {
       return res.status(500).send(error);
@@ -286,19 +238,7 @@ userRouter.delete("/:id", async (req, res) => {
       res.send(user);
     }
 
-    // Cuando se elimina una usuario también lo hace de los grupos a los que pertenezca.
-    const userGroup = await Group.find({
-      members: user._id,
-    });
-      
-    userGroup.forEach(async (item) => {
-      const index = item.members.indexOf(user.id);
-  
-      if (index > -1) {
-        item.members.splice(index, 1);
-        await item.save();
-      }
-    });
+    await deleteInOtherObjects(user);
 
   } catch (error){
     return res.status(500).send(error);

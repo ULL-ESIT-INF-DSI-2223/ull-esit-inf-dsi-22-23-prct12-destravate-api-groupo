@@ -7,6 +7,51 @@ import { updateKms } from './challenge';
 
 export const trackRouter = express.Router();
 
+export async function deleteInOtherObjects(track) {
+  // Cuando se elimina una ruta, también lo hace del reto.
+  const trackChallenge = await Challenge.find({
+    tracks: track._id
+  });
+      
+  trackChallenge.forEach(async (item) => {
+    const index = item.tracks.indexOf(track._id);
+  
+    if (index > -1) {
+      item.tracks.splice(index, 1);
+      await item.save();
+    }
+    await updateKms(item);
+  });
+
+  // Cuando se elimina una ruta, también lo hace de las rutas favoritas del usuario.
+  const trackUser = await User.find({
+    favoriteTracks: track._id
+  });
+      
+  trackUser.forEach(async (item) => {
+    const index = item.favoriteTracks.indexOf(track._id);
+  
+    if (index > -1) {
+      item.favoriteTracks.splice(index, 1);
+      await item.save();
+    }
+  });
+
+  // Cuando se elimina una ruta, también lo hace de las rutas favoritas del grupo.
+  const trackGroup = await Group.find({
+    favoriteTracks: track._id
+  });
+      
+  trackGroup.forEach(async (item) => {
+    const index = item.favoriteTracks.indexOf(track._id);
+  
+    if (index > -1) {
+      item.favoriteTracks.splice(index, 1);
+      await item.save();
+    }
+  });
+}
+
 trackRouter.get('/',  async (req, res) => {
   const filter = req.query.name?{name: req.query.name.toString()}:{};
 
@@ -127,48 +172,7 @@ trackRouter.delete('/', async (req, res) => {
       res.send(track);
     }
 
-    // Cuando se elimina una ruta, también lo hace del reto.
-    const trackChallenge = await Challenge.find({
-      tracks: track._id
-    });
-        
-    trackChallenge.forEach(async (item) => {
-      const index = item.tracks.indexOf(track._id);
-    
-      if (index > -1) {
-        item.tracks.splice(index, 1);
-        await item.save();
-      }
-      await updateKms(item, res);
-    });
-
-    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del usuario.
-    const trackUser = await User.find({
-      favoriteTracks: track._id
-    });
-        
-    trackUser.forEach(async (item) => {
-      const index = item.favoriteTracks.indexOf(track._id);
-    
-      if (index > -1) {
-        item.favoriteTracks.splice(index, 1);
-        await item.save();
-      }
-    });
-
-    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del grupo.
-    const trackGroup = await Group.find({
-      favoriteTracks: track._id
-    });
-        
-    trackGroup.forEach(async (item) => {
-      const index = item.favoriteTracks.indexOf(track._id);
-    
-      if (index > -1) {
-        item.favoriteTracks.splice(index, 1);
-        await item.save();
-      }
-    });
+    await deleteInOtherObjects(track);
 
     } catch (error) {
       return res.status(500).send(error);
@@ -184,49 +188,8 @@ trackRouter.delete('/:id', async (req, res) => {
     } else {
       res.send(track);
     }
-    
-    // Cuando se elimina una ruta, también lo hace del reto.
-    const trackChallenge = await Challenge.find({
-      tracks: track._id
-    });
-        
-    trackChallenge.forEach(async (item) => {
-      const index = item.tracks.indexOf(track._id);
-    
-      if (index > -1) {
-        item.tracks.splice(index, 1);
-        await item.save();
-      }
-      await updateKms(item, res);
-    });    
-
-    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del usuario.
-    const trackUser = await User.find({
-      favoriteTracks: track._id
-    });
-        
-    trackUser.forEach(async (item) => {
-      const index = item.favoriteTracks.indexOf(track._id);
-    
-      if (index > -1) {
-        item.favoriteTracks.splice(index, 1);
-        await item.save();
-      }
-    });
-
-    // Cuando se elimina una ruta, también lo hace de las rutas favoritas del grupo.
-    const trackGroup = await Group.find({
-      favoriteTracks: track._id
-    });
-        
-    trackGroup.forEach(async (item) => {
-      const index = item.favoriteTracks.indexOf(track._id);
-    
-      if (index > -1) {
-        item.favoriteTracks.splice(index, 1);
-        await item.save();
-      }
-    });
+ 
+    await deleteInOtherObjects(track);
 
   } catch (error) {
     return res.status(500).send(error);

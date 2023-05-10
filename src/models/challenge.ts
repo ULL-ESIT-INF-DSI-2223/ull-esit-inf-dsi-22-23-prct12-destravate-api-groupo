@@ -24,11 +24,11 @@ export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
       }
     }
   },
-  tracks: [{
-    type: Schema.Types.ObjectId,
+  tracks: {
+    type: [Schema.Types.ObjectId],
     required: true,
     ref: 'Track'
-  }],
+  },
   activity: {
     type: String,
     required: true,
