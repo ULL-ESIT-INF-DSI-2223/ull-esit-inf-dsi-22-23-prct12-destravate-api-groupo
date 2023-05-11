@@ -6,12 +6,44 @@ import { User } from '../src/models/user';
 import { Group } from '../src/models/group';
 import { expect } from 'chai';
 
+
+const firstChallenge = {
+  name: "Primerchallenge",
+  tracks: [
+    new Track({
+      startGeolocation: {
+        latitude: "28.4103 N",
+        longitude: "16.5514 W",
+      },
+      endGeolocation: {
+        latitude: "28.2277 N",
+        longitude: "16.4820 W",
+      },
+      name: "Ruta del bosque encantado",
+      length: 7,
+      unevenness: 220,
+      activity: "running",
+      rating: 8.1,
+    }),
+  ],
+  activity: "bike",
+  kms: 23,
+  users: [],
+};
+
+let challengeId = '';
+
+
 beforeEach(async () => {
   await Track.deleteMany();
   await Challenge.deleteMany();
   await User.deleteMany();
   await Group.deleteMany();
 
+  const newChallenge = await new Challenge(firstChallenge).save();
+  challengeId = newChallenge._id.toString();
+
+ 
 
   // const firstChallenge = {
   //   name: "Exploracion Magica",
@@ -203,5 +235,26 @@ describe('POST /challenges', () => {
       ],
       activity: "running"
     }).expect(404);
+  });
+});
+
+describe("GET /challenges", () => {
+  it("Should successfully get all challenges", async () => {
+    await request(app).get("/challenges").expect(200);
+  });
+  it("Should successfully consult a specific challenge by name", async () => {
+    await request(app).get("/challenges?name=Primerchallenge").expect(200);
+  });
+  it("Should successfully consult a specific challenge by ID", async () => {
+    await request(app).get(`/challenges/${challengeId}`).expect(200);
+  });
+  it("Should throw an 404 error due to not find a challenge by name", async () => {
+    await request(app).get(`/challenges?name=SegundoChallenge`).expect(404);
+  });
+  it("Should throw an 404 error due to not find a challenge by ID", async () => {
+    await request(app).get(`/challenges/645a0a15771f91e5f8d60c17`).expect(404);
+  });
+  it("Should throw an 500 error due to consult an invalid ID", async () => {
+    await request(app).get(`/challenges/one`).expect(500);
   });
 });
