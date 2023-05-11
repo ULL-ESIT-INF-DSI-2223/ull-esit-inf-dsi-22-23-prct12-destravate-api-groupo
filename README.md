@@ -101,13 +101,324 @@ export const Track = model<TrackDocumentInterface>('Track', TrackSchema);
 En el código anterior podemos ver primero la declaración de la interfaz y su posterior esquema, con todos los campos solicitados en el guion de la práctica. En le esquema se ha añadido además una serie de validadores gracias al módulo _validator_, para asegurarnos que a la hora de crear el objeto se introducen valores válidos, como que el nombre de la ruta deba de empezar por mayúscula y que solamente pueda usar caractéres alphanuméricos y espacios, además de que la longitud de la ruta y la pendiente debe de ser un número positivo y finalmente la clafisicación de la ruta debe de estar entre 0 y 10.
 ### Challenge
 ```TypeScript
+export interface ChallengeDocumentInterface extends Document {
+  name: string,
+  tracks: TrackDocumentInterface[],
+  activity: 'bike' | 'running',
+  kms: number,
+  users: UserDocumentInterface[]
+}
+
+export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: (value: string) => {
+      if (!value.match(/^[A-Z]/)) {
+        throw new Error('Challenge name must start with a capital letter');
+      } else if (!validator.default.isAlphanumeric(value.replace(/\s/g, ''))) {
+        throw new Error('Track name must contain alphanumeric characters and spaces only')
+      }
+    }
+  },
+  tracks: {
+    type: [Schema.Types.ObjectId],
+    required: true,
+    ref: 'Track'
+  },
+  activity: {
+    type: String,
+    required: true,
+    enum: ['bike', 'running'],
+  },
+  kms: {
+    type: Number,
+    required: false,
+  },
+});
+
+export const Challenge = model<ChallengeDocumentInterface>('Challenge', ChallengeSchema);
 ```
+En el caso de los retos, al igual que en rutas, declaramos la interfaz y su posterior esquema. Podemos ver que _tracks_ y _users_ son arrays de _ObjectId_, que hacen referencia a los documentos de _Track_ y _User_ respectivamente. Además, se ha añadido un validador para asegurarnos que el nombre del reto empieza por mayúscula y que solamente puede usar caractéres alphanuméricos y espacios.
 ### User
 ```TypeScript
+export interface UserDocumentInterface extends Document {
+  _id: string;
+  name: string;
+  activity: "bike" | "running";
+  friends: UserDocumentInterface[];
+  friendsGroups: {
+    name: string;
+    friends: UserDocumentInterface[];
+  }[];
+  trainingStats: {
+    weekly: {
+      length: number;
+      unevenness: number;
+    };
+    monthly: {
+      length: number;
+      unevenness: number;
+    };
+    yearly: {
+      length: number;
+      unevenness: number;
+    };
+  };
+  favoriteTracks: TrackDocumentInterface[];
+  activeChallenges: ChallengeDocumentInterface[];
+  trackHistory: {
+    tracks: TrackDocumentInterface[];
+    date: string;
+  }[];
+}
+
+export const UserSchema = new Schema<UserDocumentInterface>({
+  _id: {
+    type: String,
+    required: false,
+    auto: true,
+    default: () => new mongoose.Types.ObjectId().toString()
+  },
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: (value: string) => {
+      if (!value.match(/^[A-Z]/)) {
+        throw new Error('User name must start with a capital letter');
+      } else if (!validator.default.isAlphanumeric(value)) {
+        throw new Error('User name must contain alphanumeric characters only')
+      }
+    }
+  },
+  activity: {
+      type: String,
+      required: true,
+      enum: ["running", "bike"],
+  },
+  friends: [
+    {
+      type: Schema.Types.ObjectId,
+      required: false,
+      ref: "User",
+      default: []
+    },
+  ],
+  friendsGroups: [
+    {
+      name: {
+        type: String,
+        required: true,
+      },
+      friends: [
+        {
+          type: Schema.Types.ObjectId,
+          required: false,
+          default: [],
+          ref: "User"
+        },
+      ],
+    },
+  ],
+  trainingStats: {
+    weekly: {
+      length: {
+        type: Number,
+        default: 0,
+      },
+      unevenness: {
+        type: Number,
+        default: 0,
+      },
+    },
+    monthly: {
+      length: {
+        type: Number,
+        default: 0,
+      },
+      unevenness: {
+        type: Number,
+        default: 0,
+      },
+    },
+    yearly: {
+      length: {
+        type: Number,
+        default: 0,
+      },
+      unevenness: {
+        type: Number,
+        default: 0,
+      },
+    },
+  },
+  favoriteTracks:
+    {
+      type: [Schema.Types.ObjectId],
+      required: true,
+      ref: "Track",
+    },
+  
+  activeChallenges: [
+    {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Challenge",
+    },
+  ],
+  trackHistory: [
+    {
+      tracks: [{
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Track",
+      }],
+      date: {
+        type: String,
+        required: true,
+        validate: (value: string) => {
+          if (!value.match(/^([0-9]{2})-([0-9]{2})-([0-9]{4})$/)) {
+            throw new Error('Date must have this format: DD-MM-YYYY');
+          }
+        }
+      },
+    },
+  ],
+});
+
+export const User = model<UserDocumentInterface>("User", UserSchema);
 ```
+En el caso de los usuarios, al igual que en rutas y retos, declaramos la interfaz y su posterior esquema. Podemos ver que _friends_ y _activeChallenges_ son arrays de _ObjectId_, que hacen referencia a los documentos de _User_ y _Challenge_ respectivamente. Tenemos en el _id_ que si no se le pasa un valor, se le asigna un _ObjectId_ de mongoose. Además del validador del nombre, hemos añadido también en _trackHistory_ un validador para asegurarnos que la fecha tiene el formato correcto.
 ### Group
 ```TypeScript
+export interface GroupDocumentInterface extends Document {
+  name: string;
+  members: UserDocumentInterface[];
+  groupStats: {
+    weekly: {
+      length: number;
+      unevenness: number;
+    };
+    monthly: {
+      length: number;
+      unevenness: number;
+    };
+    yearly: {
+      length: number;
+      unevenness: number;
+    };
+  };
+  ranking: {
+    byLenght: UserDocumentInterface[];
+    byUnevenness: UserDocumentInterface[];
+  };
+  favoriteTracks: TrackDocumentInterface[];
+  trackHistory: {
+    tracks: TrackDocumentInterface[];
+    date: string;
+  }[];
+}
+
+const GroupSchema = new Schema<GroupDocumentInterface>({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: (value: string) => {
+      if (!value.match(/^[A-Z]/)) {
+        throw new Error('Group name must start with a capital letter');
+      } else if (!validator.default.isAlphanumeric(value.replace(/\s/g, ''))) {
+        throw new Error('Track name must contain alphanumeric characters and spaces only')
+      }
+    }
+  },
+  members: [
+    {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+  ],
+  groupStats: {
+    weekly: {
+      length: {
+        type: Number,
+        default: 0,
+      },
+      unevenness: {
+        type: Number,
+        default: 0,
+      },
+    },
+    monthly: {
+      length: {
+        type: Number,
+        default: 0,
+      },
+      unevenness: {
+        type: Number,
+        default: 0,
+      },
+    },
+    yearly: {
+      length: {
+        type: Number,
+        default: 0,
+      },
+      unevenness: {
+        type: Number,
+        default: 0,
+      },
+    },
+  },
+  ranking: {
+    byLenght: [
+      {
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: "User",
+      },
+    ],
+    byUnevenness: [
+      {
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: "User",
+      },
+    ],
+  },
+  favoriteTracks: [
+     {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Track",
+      },
+    ],
+  trackHistory: [
+    {
+      tracks: [{
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: "Track",
+      }],
+      date: {
+        type: String,
+        required: false,
+        validate: (value: string) => {
+          if (!value.match(/^([0-9]{2})-([0-9]{2})-([0-9]{4})$/)) {
+            throw new Error('Date must have this format: DD-MM-YYYY');
+          }
+        }
+      },
+    },
+  ],
+});
+
+export const Group = model<GroupDocumentInterface>("Group", GroupSchema);
 ```
+En el caso de los grupos tenemos la misma estructura que en el resto. En este caso, _members_ es un array de _ObjectId_ que hace referencia a los documentos de _User_. En _ranking_ tenemos dos arrays de _ObjectId_ que hacen referencia a los documentos de _User_. En _trackHistory_ tenemos un array de objetos que contiene un array de _ObjectId_ que hace referencia a los documentos de _Track_ y una fecha con su validador correspondiente.
 ## Rutas de la API
 El código se encuentra estructurado de la siguiente forma: dentro del directorio _routers_ se encuentra un fichero por cada una de las rutas anteriormente comentadas, las cuales se unen y son usadas por el servidor express, en el fichero _destravate_:
 ```TypeScript
