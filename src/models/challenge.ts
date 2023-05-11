@@ -3,6 +3,9 @@ import { TrackDocumentInterface } from './track';
 import { UserDocumentInterface } from './user';
 import * as validator from 'validator';
 
+/**
+ * Challenge interface for apply it in the challenge schema
+ */
 export interface ChallengeDocumentInterface extends Document {
   name: string,
   tracks: TrackDocumentInterface[],
@@ -11,6 +14,9 @@ export interface ChallengeDocumentInterface extends Document {
   users: UserDocumentInterface[]
 }
 
+/**
+ * Challenge Schema for create challenge objects in the database
+ */
 export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
   name: {
     type: String,
@@ -37,12 +43,7 @@ export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
   kms: {
     type: Number,
     required: false,
-  },
-  // users: [{
-  //   type: Schema.Types.ObjectId,
-  //   required: false,
-  //   default: [],
-  // }]
+  }
 });
 
 export const Challenge = model<ChallengeDocumentInterface>('Challenge', ChallengeSchema);

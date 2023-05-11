@@ -7,6 +7,10 @@ import { updateKms } from './challenge';
 
 export const trackRouter = express.Router();
 
+/**
+ * When a track is deleted, this is deleted in other objects that incluid it.
+ * @param track The track that is deleted.
+ */
 export async function deleteInOtherObjects(track) {
   // Cuando se elimina una ruta, también lo hace del reto.
   const trackChallenge = await Challenge.find({

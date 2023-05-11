@@ -453,9 +453,257 @@ app.listen(3000, () => {
   console.log('Servidor escuchando en el puerto 3000.')
 })
 ```
-A continuación veremos el código para cuada una de las rutas:
+En cada una de las rutas cuyo código se mostrará y explicará a continuación se han incluido todas las operaciones solicitadas en el enunciado de la práctica (POST, GET, PATCH, DELETE) usando tanto una _query string_ como el _id_.
 
 ### Tracks
+```TypeScript
+/**
+ * When a track is deleted, this is deleted in other objects that incluid it.
+ * @param track The track that is deleted.
+ */
+export async function deleteInOtherObjects(track) {
+  // Cuando se elimina una ruta, también lo hace del reto.
+  const trackChallenge = await Challenge.find({
+    tracks: track._id
+  });
+      
+  trackChallenge.forEach(async (item) => {
+    const index = item.tracks.indexOf(track._id);
+  
+    if (index > -1) {
+      item.tracks.splice(index, 1);
+      await item.save();
+    }
+    await updateKms(item);
+  });
+
+  // Cuando se elimina una ruta, también lo hace de las rutas favoritas del usuario.
+  const trackUser = await User.find({
+    favoriteTracks: track._id
+  });
+      
+  trackUser.forEach(async (item) => {
+    const index = item.favoriteTracks.indexOf(track._id);
+  
+    if (index > -1) {
+      item.favoriteTracks.splice(index, 1);
+      await item.save();
+    }
+  });
+
+  // Cuando se elimina una ruta, también lo hace de las rutas favoritas del grupo.
+  const trackGroup = await Group.find({
+    favoriteTracks: track._id
+  });
+      
+  trackGroup.forEach(async (item) => {
+    const index = item.favoriteTracks.indexOf(track._id);
+  
+    if (index > -1) {
+      item.favoriteTracks.splice(index, 1);
+      await item.save();
+    }
+  });
+}
+
+trackRouter.get('/',  async (req, res) => {
+  const filter = req.query.name?{name: req.query.name.toString()}:{};
+
+  try {
+    const tracks = await Track.find(filter);
+
+    if (tracks.length !== 0) {
+      return res.send(tracks);
+    }
+    return res.status(404).send();
+  } catch (error) {
+    return res.status(500).send(error);
+  }  
+});
+
+trackRouter.get('/:id', async (req, res) => {
+  try {
+    const track = await Track.findById(req.params.id); 
+  
+    if (track) {
+      return res.send(track);
+    }
+    return res.status(404).send();
+  } catch (error) {
+    return res.status(500).send(error);
+  } 
+});
+
+trackRouter.post('/', async (req, res) => {
+  const track = new Track(req.body);
+
+  try {
+    await track.save();
+    return res.status(201).send(track);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+});
+
+trackRouter.patch('/', async (req, res) => {
+  if (!req.query.name) {
+    return res.status(400).send({
+      error: 'A track name must be provided',
+    });
+  } 
+
+  const allowedUpdates = ['name', 'startGeolocation', 'endGeolocation', 'length', 'unevenness', 'activity', 'rating'];
+  const actualUpdates = Object.keys(req.body);
+  const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
+
+  if (!isValidUpdate) {
+    return res.status(400).send({
+      error: 'Update is not permitted',
+    });
+  }
+
+  try {
+    const track = await Track.findOneAndUpdate({
+      name: req.query.name.toString()
+    },
+    req.body,
+    {
+      new: true,
+      runValidators: true
+    });
+
+    if (track) {
+      return res.send(track);
+    }
+    return res.status(404).send();
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+});
+
+trackRouter.patch('/:id', async (req, res) => {  
+  const allowedUpdates = ['name', 'startGeolocation', 'endGeolocation', 'length', 'unevenness', 'activity', 'rating'];
+  const actualUpdates = Object.keys(req.body);
+  const isValidUpdate = actualUpdates.every((update) => allowedUpdates.includes(update));
+
+  if (!isValidUpdate) {
+    return res.status(400).send({
+      error: 'Update is not permitted',
+    });
+  }
+
+  try {
+    const track = await Track.findByIdAndUpdate(req.params.id,
+    req.body,
+    {
+      new: true,
+      runValidators: true
+    });
+
+    if (track) {
+      return res.send(track);
+    }
+    return res.status(404).send();
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+});
+
+trackRouter.delete('/', async (req, res) => {
+  if (!req.query.name) {
+    return res.status(400).send({
+      error: 'A track name must be provided',
+    });
+  }
+  try {
+    const track = await Track.findOneAndDelete({
+      name: req.query.name.toString(),
+    });
+    
+    if (!track) {
+      return res.status(404).send();
+    } else {
+      res.send(track);
+    }
+
+    await deleteInOtherObjects(track);
+
+    } catch (error) {
+      return res.status(500).send(error);
+    }  
+});
+
+trackRouter.delete('/:id', async (req, res) => {
+  try {
+    const track = await Track.findByIdAndDelete(req.params.id);
+
+    if (!track) {
+      return res.status(404).send();
+    } else {
+      res.send(track);
+    }
+ 
+    await deleteInOtherObjects(track);
+
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+});
+```
+Lo primero que observamos es una función _deleteInOtherObjects_ la cual es llamada cada vez que se elimina una ruta para así actualizar el resto de objetos que incluyen dicha ruta, siendo estos los retos, los usuarios y los grupos. A continuación se implementan las operaciones a través de los métodos HTTP, comenzando con el GET, donde mediante el filtro y una _query_ _string_ podemos seleccionar mostrar una ruta en concreto o todas las que se encuentran en la base de datos, también se ha incluido el get, donde la busqueda de la ruta se lleva a cabo por su identificador único dentro de la base de datos.
+\
+\
+En cuanto al POST, se recupero lo que ha introducido el usuario a través del body y si pasa todos los requisitos introducidos en el modelo, se añadirá la ruta a la base de datos. El PATCH sigue el mismo espíritu, primero tiene que encontrar la ruta que se desea modificar de distinta manera dependiendo si es con ID o mediante una _query string_, posteriormente se comprueba si los campos introducidos en el _body_ son aptos para la modificación, y si es así, se actualiza.
+\
+\
+Finalmente tenemos el método DELETE, donde una vez más se lleva a cabo de las dos formas solicitadas y en ambas se llama a la función _deleteInOtherObjects_ para eliminar dicha ruta del resto de elementos, tal y como comentábamos anteriormente.
+\
+\
+Para todas las rutas se han realizado una gran cantidad de pruebas con el fin de probar la mayor cantidad de combinaciones posibles y que las operaciones se llevan a cabo sin problema. La principal adición a las pruebas respecto de las prácticas anteriores es el uso de _supertest_. Las pruebas llevadas a cabo para _Tracks_ son las siguientes:
+```
+  POST /tracks
+    ✔ Should successfully create a new track
+    ✔ Should throw an 500 error when creating a track due to the name is not according the validator (Uso characters that are not alphanumeric)
+    ✔ Should throw an 500 error when creating a track due to the length and unevenness are not according the validator (they are not > 0)
+    ✔ Should throw an 500 error when creating a track due to the the activity is not according the validator (only can be running or bike)
+    ✔ Should throw an 404 error when creating a track
+
+  GET /tracks
+    ✔ Should successfully consult all tracks
+    ✔ Should successfully consult a specific track by name
+    ✔ Should successfully consult a specific track by ID
+    ✔ Should throw an 404 error due to not find a user by name
+    ✔ Should throw an 404 error due to not find a user by ID
+    ✔ Should throw an 500 error due to consult an invalid ID
+
+  PATCH /tracks
+    ✔ Should successfully modify a track by name
+    ✔ Should successfully modify a track by ID
+    ✔ Should throw an 404 error due to not find a track to modify by name
+    ✔ Should throw an 404 error due to not find a track to modify by ID
+    ✔ Should throw an 400 error due to not provide a track name
+    ✔ Should throw an 400 error due to the update is not permited by name
+    ✔ Should throw an 400 error due to the update is not permited by ID
+    ✔ Should throw an 500 error due to do an invalid modification by name (length can't be <= 0)
+    ✔ Should throw an 500 error due to do an invalid modification by name (The track name must start with a capital letter)
+    ✔ Should throw an 500 error due to do an invalid modification by ID (length can't be <= 0)
+    ✔ Should throw an 500 error due to do an invalid modification by ID (The track name must start with a capital letter)
+
+  DELETE /tracks
+    ✔ Should successfully delete a track by name
+    ✔ Should successfully delete a track by ID
+    ✔ Should throw an 404 error due to not find a track to delete by name
+    ✔ Should throw an 404 error due to not find a track to delete by ID
+    ✔ Should throw an 500 error due to try to delete a track with an invalid ID
+    ✔ Should delete the track from the tracks that make up the challenge
+    ✔ Should delete the track from the user's favoriteTracks
+    ✔ Should delete the track from the group's favoriteTracks
+```
+### Challenge
+
+### User
+
+### Group
 
 ## Conclusión
 Con la realización de este proyecto hemos aprendido a crear nuestra propia API REST, lo cual es fundamental en el desarrollo de aplicaciones, permitiendo que diferentes sistemas y aplicaciones se comuniquen de manera eficiente. También cómo se relaciona esta con una base de datos, en nuestro caso mongoose, donde hemos implementado las 4 funciones basicas (inserción, consulta, borrado y modificación). También hemos implementado el uso de async/await, lo que nos permite trabajar con código asíncrono de manera más legible.
