@@ -114,13 +114,13 @@ export const UserSchema = new Schema<UserDocumentInterface>({
       },
     },
   },
-  favoriteTracks: [
+  favoriteTracks:
     {
-      type: Schema.Types.ObjectId,
+      type: [Schema.Types.ObjectId],
       required: true,
       ref: "Track",
     },
-  ],
+  
   activeChallenges: [
     {
       type: Schema.Types.ObjectId,

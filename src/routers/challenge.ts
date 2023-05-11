@@ -35,13 +35,13 @@ export async function checkItemsExists(challenge) {
     }
   }
 
-  // Comprobar que los usuarios existen en la base de datos.
-  for (let i = 0; i < challenge.users.length; i++) {
-    const checkUser = await User.findById(challenge.users[i]);
-    if (!checkUser) {
-      throw new Error("Any user is not in the database")
-    }
-  }
+//   // Comprobar que los usuarios existen en la base de datos.
+//   for (let i = 0; i < challenge.users.length; i++) {
+//     const checkUser = await User.findById(challenge.users[i]);
+//     if (!checkUser) {
+//       throw new Error("Any user is not in the database")
+//     }
+//   }
 }
 
 export async function deleteInOtherObjects(challenge) {

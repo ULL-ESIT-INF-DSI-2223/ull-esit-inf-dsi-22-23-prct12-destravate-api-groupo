@@ -10,9 +10,139 @@ Esta práctica se ha realizado en grupo por los siguientes alumnos:
 \
 El código fuente del proyecto se encuentra organizado en diferentes directorios y se hace uso de sintaxis ES para importar/exportar las distintas entidades.
 ## Requisitos del sistema
-Para la creación de este sistema se proponen 4 elementos fundamentales: _Tracks_, Usuarios, Grupos y Retos.
+Para la creación de este sistema se proponen 4 elementos fundamentales: _Tracks_, Usuarios, Grupos y Retos. Para cada uno de ellos se ha creado en el directorio _models_ sus respectivas interfaces y esquemas para crear el modelo que será usado en la base de datos. Cabe destacar que algunos de los elementos de información se han omitidos con el fin de evitar bucles, tal y cómo comentó el profesor, es por ello que en _Tracks_ y Retos no se incluyen los Usuarios, pero sí a la inversa, para así evitar bucles.
+### Track
+```TypeScript
+export interface TrackDocumentInterface extends Document {
+  name: string,
+  startGeolocation: {
+    latitude: string,
+    longitude: string
+  },
+  endGeolocation: {
+    latitude: string,
+    longitude: string
+  },
+  length: number,
+  unevenness: number,  
+  activity: 'bike' | 'running',
+  rating: number
+}
 
-## Ejercicio de clase
+export const TrackSchema = new Schema<TrackDocumentInterface>({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: (value: string) => {
+      if (!value.match(/^[A-Z]/)) {
+        throw new Error('Track name must start with a capital letter');
+      } else if (!validator.default.isAlphanumeric(value.replace(/\s/g, ''))) {
+        throw new Error('Track name must contain alphanumeric characters and spaces only')
+      }
+    }
+  },
+  startGeolocation: {
+    latitude: {
+      type: String,
+      required: true,
+    },
+    longitude: {
+      type: String,
+      required: true,
+    }
+  },
+  endGeolocation: {
+    latitude: {
+      type: String,
+      required: true,
+    },
+    longitude: {
+      type: String,
+      required: true,
+    }
+  },
+  length: {
+    type: Number,
+    required: true,
+    validate(value: number) {
+      if (value <= 0) {
+        throw new Error('Unevenness must be greater than 0');
+      }
+    } 
+  },
+  unevenness: {
+    type: Number,
+    required: true,
+    validate(value: number) {
+      if (value <= 0) {
+        throw new Error('Unevenness must be greater than 0');
+      }
+    } 
+  },
+  activity: {
+    type: String,
+    required: true,
+    enum: ['bike', 'running'],
+  },
+  rating: {
+    type: Number,
+    required: true,
+    validate(value: number) {
+      if (value < 0 || value > 10) {
+        throw new Error('Rating must be greater than or equal to 0 and lower than or equal to 10');
+      }
+    }    
+  }
+});
+
+export const Track = model<TrackDocumentInterface>('Track', TrackSchema);
+```
+En el código anterior podemos ver primero la declaración de la interfaz y su posterior esquema, con todos los campos solicitados en el guion de la práctica. En le esquema se ha añadido además una serie de validadores gracias al módulo _validator_, para asegurarnos que a la hora de crear el objeto se introducen valores válidos, como que el nombre de la ruta deba de empezar por mayúscula y que solamente pueda usar caractéres alphanuméricos y espacios, además de que la longitud de la ruta y la pendiente debe de ser un número positivo y finalmente la clafisicación de la ruta debe de estar entre 0 y 10.
+### Challenge
+```TypeScript
+```
+### User
+```TypeScript
+```
+### Group
+```TypeScript
+```
+## Rutas de la API
+El código se encuentra estructurado de la siguiente forma: dentro del directorio _routers_ se encuentra un fichero por cada una de las rutas anteriormente comentadas, las cuales se unen y son usadas por el servidor express, en el fichero _destravate_:
+```TypeScript
+export const app = express();
+app.use(express.json());
+
+app.use('/tracks', trackRouter);
+app.use('/users', userRouter);
+app.use('/groups', groupRouter);
+app.use('/challenges', challengeRouter);
+
+/**
+ * Show 404 error if access to a wrong path.
+ */
+app.get('*', (_, res) => {
+  res.status(404).send();
+});
+
+app.post('*', (_, res) => {
+  res.status(404).send();
+});
+
+app.patch('*', (_, res) => {
+  res.status(404).send();
+});
+
+app.delete('*', (_, res) => {
+  res.status(404).send();
+});
+
+app.listen(3000, () => {
+  console.log('Servidor escuchando en el puerto 3000.')
+})
+```
+A continuación veremos el código para cuada una de las rutas:
 
 ## Conclusión
 Con la realización de este proyecto hemos aprendido a crear nuestra propia API REST, lo cual es fundamental en el desarrollo de aplicaciones, permitiendo que diferentes sistemas y aplicaciones se comuniquen de manera eficiente. También cómo se relaciona esta con una base de datos, en nuestro caso mongoose, donde hemos implementado las 4 funciones basicas (inserción, consulta, borrado y modificación). También hemos implementado el uso de async/await, lo que nos permite trabajar con código asíncrono de manera más legible.

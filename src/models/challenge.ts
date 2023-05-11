@@ -19,8 +19,8 @@ export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
     validate: (value: string) => {
       if (!value.match(/^[A-Z]/)) {
         throw new Error('Challenge name must start with a capital letter');
-      } else if (!validator.default.isAlphanumeric(value)) {
-        throw new Error('Challenge name must contain alphanumeric characters only')
+      } else if (!validator.default.isAlphanumeric(value.replace(/\s/g, ''))) {
+        throw new Error('Track name must contain alphanumeric characters and spaces only')
       }
     }
   },
@@ -38,11 +38,11 @@ export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
     type: Number,
     required: false,
   },
-  users: [{
-    type: Schema.Types.ObjectId,
-    required: false,
-    default: [],
-  }]
+  // users: [{
+  //   type: Schema.Types.ObjectId,
+  //   required: false,
+  //   default: [],
+  // }]
 });
 
 export const Challenge = model<ChallengeDocumentInterface>('Challenge', ChallengeSchema);
