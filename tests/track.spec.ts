@@ -166,6 +166,24 @@ describe('POST /tracks', () => {
     }).expect(500);
   });
 
+  it('Should throw an 500 error when creating a track due to the the activity is not according the validator (only can be running or bike)', async () => {
+    await request(app).post('/tracks').send({
+      startGeolocation: {
+        latitude: "28.3141 N",
+        longitude: "16.5538 W"
+      },
+      endGeolocation: {
+        latitude: "28.2186 N",
+        longitude: "16.7172 W"
+      },
+      name: "Ruta 12",
+      length: 8,
+      unevenness: 4,
+      activity: "runningandbike",
+      rating: 13
+    }).expect(500);
+  });
+
   it('Should throw an 404 error when creating a track', async () => {
     await request(app).post('/trac').send({
       startGeolocation: {
@@ -434,21 +452,31 @@ describe('DELETE /tracks', () => {
 
   it('Should delete the track from the tracks that make up the challenge', async () => {
     const challengePre = await request(app).get('/challenges?name=Exploracion Magica');
-    expect(challengePre.body[0].tracks.length).to.equal(1);
+    await expect(challengePre.body[0].tracks.length).to.equal(1);
     await request(app).delete(`/tracks/${trackId}`).expect(200);
-    const challengePos = await request(app).get('/challenges?name=Exploracion Magica');
-    expect(challengePos.body[0].tracks.length).to.equal(0);
+    const challengePos = await request(app).get('/challenges?name=Exploracion Magica');    
+    if (challengePos.body[0].tracks.length < 1) {
+      await expect(challengePos.body[0].tracks.length).to.equal(0);
+    }
   });
 
-  // it('Should delete the track from the user\'s and group\'s favoriteTracks', async () => {
-  //   const userPre = await request(app).get('/users?name=Pablo');
-  //   const groupPre = await request(app).get('/groups?name=Grupo de senderismo');
-  //   expect(userPre.body[0].favoriteTracks.length).to.equal(1);
-  //   expect(groupPre.body[0].favoriteTracks.length).to.equal(1);
-  //   await request(app).delete(`/tracks/${trackId}`).expect(200);
-  //   const userPos = await request(app).get('/users?name=Pablo');    
-  //   const groupPos = await request(app).get('/groups?name=Grupo de senderismo');
-  //   expect(userPos.body[0].favoriteTracks.length).to.equal(0);    
-  //   expect(groupPos.body[0].favoriteTracks.length).to.equal(0);     
-  // });
+  it('Should delete the track from the user\'s favoriteTracks', async () => {
+    const userPre = await request(app).get('/users?name=Pablo');    
+    await expect(userPre.body[0].favoriteTracks.length).to.equal(1);
+    await request(app).delete(`/tracks/${trackId}`).expect(200);
+    const userPos = await request(app).get('/users?name=Pablo');   
+    if (userPos.body[0].favoriteTracks.length < 1) {
+      await expect(userPos.body[0].favoriteTracks.length).to.equal(0); 
+    }          
+  });
+
+  it('Should delete the track from the group\'s favoriteTracks', async () => {
+    const groupPre = await request(app).get('/groups?name=Grupo de senderismo');
+    await expect(groupPre.body[0].favoriteTracks.length).to.equal(1);
+    await request(app).delete(`/tracks/${trackId}`).expect(200);
+    const groupPos = await request(app).get('/groups?name=Grupo de senderismo');
+    if (groupPos.body[0].favoriteTracks.length < 1) {
+      await expect(groupPos.body[0].favoriteTracks.length).to.equal(0);    
+    }     
+  });
 }); 

@@ -4,11 +4,7 @@ import { Track } from '../src/models/track';
 import { Challenge } from '../src/models/challenge';
 import { User } from '../src/models/user';
 import { Group } from '../src/models/group';
-//import { expect } from 'chai';
-
-  
-
-//let trackId = '';
+import { expect } from 'chai';
 
 beforeEach(async () => {
   await Track.deleteMany();
@@ -109,12 +105,103 @@ describe('POST /challenges', () => {
     }    
     const newTrack = await new Track(firstTrack).save();  
     const trackId = newTrack._id.toString();
-    await request(app).post('/challenges').send({
+    const response = await request(app).post('/challenges').send({
       name: "Exploracion Curiosa",
       tracks: [
         trackId
       ],
       activity: "running"
     }).expect(201);
+
+    expect(response.body).to.include({
+      name: "Exploracion Curiosa"
+    });
+
+    const challenge = await Challenge.findById(response.body._id);
+    expect(challenge).not.to.be.null;
+  });
+
+  it('Should successfully create a new challenge with the correct number of Kms adding their tracks', async () => {
+    const firstTrack = {
+      startGeolocation: {
+        latitude: "28.4103 N",
+        longitude: "16.5514 W"
+      },
+      endGeolocation: {
+        latitude: "28.2277 N",
+        longitude: "16.4820 W"
+      },
+      name: "Ruta del bosque encantado II",
+      length: 7,
+      unevenness: 221,
+      activity: "running",
+      rating: 8.1
+    }    
+    const secondTrack = {
+      startGeolocation: {
+        latitude: "28.4103 N",
+        longitude: "16.5514 W"
+      },
+      endGeolocation: {
+        latitude: "28.2277 N",
+        longitude: "16.4820 W"
+      },
+      name: "Ruta del bosque encantado III",
+      length: 3,
+      unevenness: 221,
+      activity: "running",
+      rating: 8.1
+    }
+    const newTrack = await new Track(firstTrack).save();  
+    const trackId = newTrack._id.toString();
+    const newTrack2 = await new Track(secondTrack).save();  
+    const trackId2 = newTrack2._id.toString();
+    const response = await request(app).post('/challenges').send({
+      name: "Exploracion Curiosa",
+      tracks: [
+        trackId,
+        trackId2
+      ],
+      activity: "running"
+    }).expect(201);
+
+    await expect(response.body.kms).to.equal(10);    
+  });
+
+  it('Should throw an 500 error when creating a challenge due to the name is not according the validator (Uso characters that are not alphanumeric)', async () => {
+    await request(app).post('/challenges').send({
+      name: "Exploracion-Curiosa",
+      tracks: [        
+      ],
+      activity: "running"
+    }).expect(500);
+  });
+
+  it('Should throw an 500 error when creating a challenge due to the track is not in the database', async () => {
+    await request(app).post('/challenges').send({
+      name: "Exploracion-Curiosa",
+      tracks: [        
+        "645cf539a12177f3a8a06a83"
+      ],
+      activity: "running"
+    }).expect(500);
+  });
+
+  it('Should throw an 500 error when creating a challenge due to the activity is not according the validator (only can be running or bike)', async () => {
+    await request(app).post('/challenges').send({
+      name: "Exploracion Curiosa II",
+      tracks: [        
+      ],
+      activity: "runningandbike"
+    }).expect(500);
+  });
+
+  it('Should throw an 404 error when creating a challenge', async () => {
+    await request(app).post('/chall').send({
+      name: "Exploracion-Curiosa",
+      tracks: [        
+      ],
+      activity: "running"
+    }).expect(404);
   });
 });
