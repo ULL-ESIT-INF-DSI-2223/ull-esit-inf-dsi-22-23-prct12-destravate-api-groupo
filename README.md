@@ -13,6 +13,9 @@ El código fuente del proyecto se encuentra organizado en diferentes directorios
 Para la creación de este sistema se proponen 4 elementos fundamentales: _Tracks_, Usuarios, Grupos y Retos. Para cada uno de ellos se ha creado en el directorio _models_ sus respectivas interfaces y esquemas para crear el modelo que será usado en la base de datos. Cabe destacar que algunos de los elementos de información se han omitidos con el fin de evitar bucles, tal y cómo comentó el profesor, es por ello que en _Tracks_ y Retos no se incluyen los Usuarios, pero sí a la inversa, para así evitar bucles.
 ### Track
 ```TypeScript
+/**
+ * Track interface for apply it in the Track schema
+ */
 export interface TrackDocumentInterface extends Document {
   name: string,
   startGeolocation: {
@@ -29,6 +32,9 @@ export interface TrackDocumentInterface extends Document {
   rating: number
 }
 
+/**
+ * Track Schema for create Track objects in the database
+ */
 export const TrackSchema = new Schema<TrackDocumentInterface>({
   name: {
     type: String,
@@ -101,14 +107,19 @@ export const Track = model<TrackDocumentInterface>('Track', TrackSchema);
 En el código anterior podemos ver primero la declaración de la interfaz y su posterior esquema, con todos los campos solicitados en el guion de la práctica. En le esquema se ha añadido además una serie de validadores gracias al módulo _validator_, para asegurarnos que a la hora de crear el objeto se introducen valores válidos, como que el nombre de la ruta deba de empezar por mayúscula y que solamente pueda usar caractéres alphanuméricos y espacios, además de que la longitud de la ruta y la pendiente debe de ser un número positivo y finalmente la clafisicación de la ruta debe de estar entre 0 y 10.
 ### Challenge
 ```TypeScript
+/**
+ * Challenge interface for apply it in the challenge schema
+ */
 export interface ChallengeDocumentInterface extends Document {
   name: string,
   tracks: TrackDocumentInterface[],
   activity: 'bike' | 'running',
   kms: number,
-  users: UserDocumentInterface[]
 }
 
+/**
+ * Challenge Schema for create challenge objects in the database
+ */
 export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
   name: {
     type: String,
@@ -135,7 +146,7 @@ export const ChallengeSchema = new Schema<ChallengeDocumentInterface>({
   kms: {
     type: Number,
     required: false,
-  },
+  }
 });
 
 export const Challenge = model<ChallengeDocumentInterface>('Challenge', ChallengeSchema);
@@ -143,6 +154,9 @@ export const Challenge = model<ChallengeDocumentInterface>('Challenge', Challeng
 En el caso de los retos, al igual que en rutas, declaramos la interfaz y su posterior esquema. Podemos ver que _tracks_ y _users_ son arrays de _ObjectId_, que hacen referencia a los documentos de _Track_ y _User_ respectivamente. Además, se ha añadido un validador para asegurarnos que el nombre del reto empieza por mayúscula y que solamente puede usar caractéres alphanuméricos y espacios.
 ### User
 ```TypeScript
+/**
+ * User interface for apply it in the User schema
+ */
 export interface UserDocumentInterface extends Document {
   _id: string;
   name: string;
@@ -174,6 +188,9 @@ export interface UserDocumentInterface extends Document {
   }[];
 }
 
+/**
+ * User Schema for create User objects in the database
+ */
 export const UserSchema = new Schema<UserDocumentInterface>({
   _id: {
     type: String,
@@ -293,6 +310,9 @@ export const User = model<UserDocumentInterface>("User", UserSchema);
 En el caso de los usuarios, al igual que en rutas y retos, declaramos la interfaz y su posterior esquema. Podemos ver que _friends_ y _activeChallenges_ son arrays de _ObjectId_, que hacen referencia a los documentos de _User_ y _Challenge_ respectivamente. Tenemos en el _id_ que si no se le pasa un valor, se le asigna un _ObjectId_ de mongoose. Además del validador del nombre, hemos añadido también en _trackHistory_ un validador para asegurarnos que la fecha tiene el formato correcto.
 ### Group
 ```TypeScript
+/**
+ * Group interface for apply it in the Group schema
+ */
 export interface GroupDocumentInterface extends Document {
   name: string;
   members: UserDocumentInterface[];
@@ -321,6 +341,9 @@ export interface GroupDocumentInterface extends Document {
   }[];
 }
 
+/**
+ * Group Schema for create Group objects in the database
+ */
 const GroupSchema = new Schema<GroupDocumentInterface>({
   name: {
     type: String,
@@ -597,6 +620,8 @@ trackRouter.patch('/:id', async (req, res) => {
   }
 });
 
+
+
 trackRouter.delete('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -687,11 +712,126 @@ Para todas las rutas se han realizado una gran cantidad de pruebas con el fin de
     ✔ Should delete the track from the user's favoriteTracks
     ✔ Should delete the track from the group's favoriteTracks
 ```
-### Challenge
+### Challenges
 
-### User
+Las pruebas llevadas a cabo para _Challenges_ son las siguientes:
+```
+POST /challenges
+    ✔ Should successfully create a new challenge (66ms)
+    ✔ Should successfully create a new challenge with the correct number of Kms adding their tracks
+    ✔ Should throw an 500 error when creating a challenge due to the name is not according the validator (Uso characters that are not alphanumeric)
+    ✔ Should throw an 500 error when creating a challenge due to the track is not in the database
+    ✔ Should throw an 500 error when creating a challenge due to the activity is not according the validator (only can be running or bike)
+    ✔ Should throw an 404 error when creating a challenge
 
-### Group
+  GET /challenges
+    ✔ Should successfully get all challenges
+    ✔ Should successfully consult a specific challenge by name
+    ✔ Should successfully consult a specific challenge by ID
+    ✔ Should throw an 404 error due to not find a challenge by name
+    ✔ Should throw an 404 error due to not find a challenge by ID
+    ✔ Should throw an 500 error due to consult an invalid ID
+
+  PATCH /challenges
+    ✔ Should successfully modify a challenge by name
+    ✔ Should successfully modify a challenge by ID
+    ✔ Should throw an 404 error due to not find a challange to modify by name
+    ✔ Should throw an 404 error due to not find a challange to modify by ID
+    ✔ Should throw an 400 error due to not provide a challenge name
+    ✔ Should throw an 400 error due to the update is not permited by name
+    ✔ Should throw an 400 error due to the update is not permited by ID
+    ✔ Should throw an 500 error due to do an invalid modification by name (The challenge name must start with a capital letter)
+    ✔ Should throw an 500 error due to do an invalid modification by ID (The challenge name must start with a capital letter)
+
+  DELETE /challenges
+    ✔ Should successfully delete a challenge by name
+    ✔ Should successfully delete a challenge by ID
+    ✔ Should throw an 404 error due to not find a challenge to delete by name
+    ✔ Should throw an 404 error due to not find a challenge to delete by ID
+    ✔ Should throw an 500 error due to try to delete a challenge with an invalid ID
+    ✔ Should delete the challenge from the active challenge from user
+```
+### Users
+
+Las pruebas llevadas a cabo para _Users_ son las siguientes:
+```
+POST /users
+    ✔ Should successfully create a new user
+    ✔ Should throw an 500 error when creating an user due to the name is not according the validator (Uso characters that are not alphanumeric)
+    ✔ Should throw an 500 error when creating an user due to the users in friends is not in the database
+    ✔ Should throw an 500 error when creating an user due to the friends in friendsGroup is not in the database
+    ✔ Should throw an 500 error when creating an user due to the tracks in favoriteTracks is not in the database
+    ✔ Should throw an 500 error when creating an user due to the challenge in activeChallenge is not in the database
+    ✔ Should throw an 500 error when creating an user due to the tracks in trackHistory is not in the database
+    ✔ Should throw an 500 error when creating an user due to tracks in favoriteTracks is not in the database
+    ✔ Should throw an 500 error when creating a user due to the activity is not according the validator (only can be running or bike)
+    ✔ Should throw an 404 error when creating a challenge, due to an invalid path
+
+  GET /users
+    ✔ Should successfully consult all users
+    ✔ Should successfully consult a specific user by name
+    ✔ Should successfully consult a specific user by ID
+    ✔ Should throw an 404 error due to not find a user by name
+    ✔ Should throw an 404 error due to not find a user by ID
+
+  PATCH /users
+    ✔ Should successfully modify a user by ID
+    ✔ Should successfully modify a user by name
+    ✔ Should throw an 404 error due to not find an user to modify by name
+    ✔ Should throw an 404 error due to not find an user to modify by ID
+    ✔ Should throw an 400 error due to not provide a user name
+    ✔ Should throw an 400 error due to the update is not permited by name
+    ✔ Should throw an 400 error due to the update is not permited by ID
+    ✔ Should throw an 500 error due to do an invalid modification by name (The user name must start with a capital letter)
+    ✔ Should throw an 500 error due to do an invalid modification by ID (The user name must start with a capital letter)
+
+  DELETE /users
+    ✔ Should successfully delete an user by name
+    ✔ Should successfully delete an user by ID
+    ✔ Should throw an 404 error due to not find an user to delete by name
+    ✔ Should throw an 404 error due to not find an user to delete by ID
+    ✔ Should throw an 500 error due to try to delete an user with an invalid ID
+    ✔ Should delete the user from the active members from a group
+    ✔ Should delete the user from the friends of other users
+```
+### Groups
+Las pruebas llevadas a cabo para _Group_ son las siguientes:
+```
+POST /groups
+    ✔ Should successfully create a new group (48ms)
+    ✔ Should throw an 500 error when creating a group due to the name is not according the validator (Uso characters that are not alphanumeric)
+    ✔ Should throw an 500 error when creating a group due to the users in members are not in the database
+    ✔ Should throw an 500 error when creating a group due to the tracks in favoriteTracks are not in the database
+    ✔ Should throw an 500 error when creating a group due to the tracks in trackHistory are not in the database
+    ✔ Should throw an 500 error when creating a group due to group name doesn't start by a capital letter
+    ✔ Should throw an 404 error when creating a group, due to an invalid path
+
+  GET /groups
+    ✔ Should successfully consult all groups
+    ✔ Should successfully consult a specific group by name
+    ✔ Should successfully consult a specific group by ID
+    ✔ Should throw an 404 error due to not find a group by name
+    ✔ Should throw an 404 error due to not find a group by ID
+    ✔ Should throw an 500 error due to ge by an invlid ID
+
+  PATCH /groups
+    ✔ Should successfully modify a group by ID
+    ✔ Should successfully modify a user by name
+    ✔ Should throw an 404 error due to not find a group to modify by name
+    ✔ Should throw an 404 error due to not find a group to modify by ID
+    ✔ Should throw an 400 error due to not provide a group name
+    ✔ Should throw an 400 error due to the update is not permited by name
+    ✔ Should throw an 400 error due to the update is not permited by ID
+    ✔ Should throw an 500 error due to do an invalid modification by name (The group name must start with a capital letter)
+    ✔ Should throw an 500 error due to do an invalid modification by ID (The group name must start with a capital letter)
+
+  DELETE /groups
+    ✔ Should successfully delete an group by name
+    ✔ Should successfully delete an group by ID
+    ✔ Should throw an 404 error due to not find an group to delete by name
+    ✔ Should throw an 404 error due to not find an group to delete by ID
+    ✔ Should throw an 500 error due to try to delete an group with an invalid ID
+```
 
 ## Despliegue de la API en cyclic y MongoDB Atlas
 

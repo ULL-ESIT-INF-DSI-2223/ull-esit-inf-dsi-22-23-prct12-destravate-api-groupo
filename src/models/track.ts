@@ -1,6 +1,9 @@
 import { Document, model, Schema } from 'mongoose';
 import * as validator from 'validator';
 
+/**
+ * Track interface for apply it in the Track schema
+ */
 export interface TrackDocumentInterface extends Document {
   name: string,
   startGeolocation: {
@@ -17,6 +20,9 @@ export interface TrackDocumentInterface extends Document {
   rating: number
 }
 
+/**
+ * Track Schema for create Track objects in the database
+ */
 export const TrackSchema = new Schema<TrackDocumentInterface>({
   name: {
     type: String,

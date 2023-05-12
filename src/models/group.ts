@@ -3,6 +3,9 @@ import { TrackDocumentInterface } from "./track";
 import { UserDocumentInterface } from "./user";
 import * as validator from 'validator';
 
+/**
+ * Group interface for apply it in the Group schema
+ */
 export interface GroupDocumentInterface extends Document {
   name: string;
   members: UserDocumentInterface[];
@@ -31,6 +34,9 @@ export interface GroupDocumentInterface extends Document {
   }[];
 }
 
+/**
+ * Group Schema for create Group objects in the database
+ */
 const GroupSchema = new Schema<GroupDocumentInterface>({
   name: {
     type: String,

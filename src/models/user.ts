@@ -3,6 +3,9 @@ import { TrackDocumentInterface } from './track';
 import { ChallengeDocumentInterface } from './challenge';
 import * as validator from 'validator';
 
+/**
+ * User interface for apply it in the User schema
+ */
 export interface UserDocumentInterface extends Document {
   _id: string;
   name: string;
@@ -34,6 +37,9 @@ export interface UserDocumentInterface extends Document {
   }[];
 }
 
+/**
+ * User Schema for create User objects in the database
+ */
 export const UserSchema = new Schema<UserDocumentInterface>({
   _id: {
     type: String,

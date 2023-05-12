@@ -1,7 +1,13 @@
 {
   "entryPoints": [
     "./src/routers/challenge.ts",    
-    "./src/routers/tracks.ts"
+    "./src/routers/tracks.ts",
+    "./src/routers/group.ts",    
+    "./src/routers/users.ts",
+    "./src/models/challenge.ts",    
+    "./src/models/tracks.ts",
+    "./src/models/group.ts",    
+    "./src/models/users.ts"
   ],
   "out": "./docs" 
 }

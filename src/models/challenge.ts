@@ -1,6 +1,5 @@
 import { Document, model, Schema } from 'mongoose';
 import { TrackDocumentInterface } from './track';
-import { UserDocumentInterface } from './user';
 import * as validator from 'validator';
 
 /**
@@ -11,7 +10,6 @@ export interface ChallengeDocumentInterface extends Document {
   tracks: TrackDocumentInterface[],
   activity: 'bike' | 'running',
   kms: number,
-  users: UserDocumentInterface[]
 }
 
 /**

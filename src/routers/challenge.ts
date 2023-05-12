@@ -25,8 +25,11 @@ export async function updateKms(challenge) {
   await challenge.save();
 }
 
+/**
+ * Check if an item exists in the database when its ID is going to use for create/modify a challenge, in this case the tracks.
+ * @param challenge Challenge which tracks will be checked
+ */
 export async function checkItemsExists(challenge) {
-
   // Comprobar que los tracks existen en la base de datos.
   for (let i = 0; i < challenge.tracks.length; i++) {
     const checkTrack = await Track.findById(challenge.tracks[i]);
@@ -34,18 +37,13 @@ export async function checkItemsExists(challenge) {
       throw new Error("Any track is not in the database")
     }
   }
-
-//   // Comprobar que los usuarios existen en la base de datos.
-//   for (let i = 0; i < challenge.users.length; i++) {
-//     const checkUser = await User.findById(challenge.users[i]);
-//     if (!checkUser) {
-//       throw new Error("Any user is not in the database")
-//     }
-//   }
 }
 
+/**
+ * When a challenge is deleted, this is deleted in the rest of the items that include it.
+ * @param challenge Challenge that will be deleted in the rest of the items.
+ */
 export async function deleteInOtherObjects(challenge) {
-
   // Cuando se elimina un reto, también lo hace de los retos activos del usuario.
   const challengeUser = await User.find({
     activeChallenges: challenge._id
@@ -61,6 +59,9 @@ export async function deleteInOtherObjects(challenge) {
   });
 }
 
+/**
+ * Get all the challenges in the database or only one if the query string name exists
+ */
 challengeRouter.get('/',  async (req, res) => {
   const filter = req.query.name?{name: req.query.name.toString()}:{};
 
@@ -76,6 +77,9 @@ challengeRouter.get('/',  async (req, res) => {
   }  
 });
 
+/**
+ * Get a specify challenge according to its ID
+ */
 challengeRouter.get('/:id', async (req, res) => {
   try {
     const challenge = await Challenge.findById(req.params.id); 
@@ -89,6 +93,9 @@ challengeRouter.get('/:id', async (req, res) => {
   } 
 });
 
+/**
+ * Create a challenge in the database
+ */
 challengeRouter.post('/', async (req, res) => {
   const challenge = new Challenge(req.body);
   
@@ -101,6 +108,9 @@ challengeRouter.post('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a challenge in the database using its name as query string
+ */
 challengeRouter.patch('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -140,6 +150,9 @@ challengeRouter.patch('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a challenge in the database using its ID
+ */
 challengeRouter.patch('/:id', async (req, res) => {  
   const allowedUpdates = ['name', 'tracks', 'activity', 'users'];
   const actualUpdates = Object.keys(req.body);
@@ -171,7 +184,9 @@ challengeRouter.patch('/:id', async (req, res) => {
   }
 });
 
-
+/**
+ * Delete a challenge in the database using its name as query string
+ */
 challengeRouter.delete('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -196,6 +211,9 @@ challengeRouter.delete('/', async (req, res) => {
   }  
 });
 
+/**
+ * Delete a challenge in the database using its ID
+ */
 challengeRouter.delete('/:id', async (req, res) => {
   try {
     const challenge = await Challenge.findByIdAndDelete(req.params.id);

@@ -4,6 +4,7 @@ import { User } from "../models/user"
 import { Track } from "../models/track";
 
 export const groupRouter = express.Router();
+
 /**
  * Update the group stats according to the individual users stats
  * @param group Group whose stats are going to be update
@@ -39,8 +40,11 @@ export async function updateStats(group) {
   await group.save();
 }
 
-export async function ranking(group) {
-  
+/**
+ * Sort the users that conform a group according to the kms and unevenness
+ * @param group The group which members will be sorted
+ */
+export async function ranking(group) {  
   interface userValue {
     id: string;
     number: number
@@ -80,8 +84,11 @@ export async function ranking(group) {
   await group.save()
 }
 
+/**
+ * Check if an item exists in the database when its ID is going to use for create/modify a group, in this case the tracks and the users.
+ * @param group Group which tracks and users will be checked
+ */
 export async function checkItemsExists(group) {
-
   // Comprobar que los usuarios participantes del grupo existen en la base de datos.
   for (let i = 0; i < group.members.length; i++) {
     const checkUser = await User.findById(group.members[i]);
@@ -99,6 +106,9 @@ export async function checkItemsExists(group) {
   }
 }
 
+/**
+ * Get all the groups in the database or only one if the query string name exists
+ */
 groupRouter.get('/', async (req, res) => {
   const filter = req.query.name?{name: req.query.name.toString()}:{};
 
@@ -114,6 +124,9 @@ groupRouter.get('/', async (req, res) => {
   }
 });
 
+/**
+ * Get a specify group according to its ID
+ */
 groupRouter.get('/:id', async (req, res) => {
   try {
     const group = await Group.findById(req.params.id);
@@ -127,6 +140,9 @@ groupRouter.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * Create a group in the database
+ */
 groupRouter.post('/', async (req, res) => {
   const group = new Group(req.body);
 
@@ -140,6 +156,9 @@ groupRouter.post('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a group in the database using its name as query string
+ */
 groupRouter.patch('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -179,6 +198,9 @@ groupRouter.patch('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a group in the database using its ID
+ */
 groupRouter.patch('/:id', async (req, res) => {
   const allowedUpdates = ['name', 'members', 'groupStats', 'favoriteTracks', 'trackHistory'];
   const actualUpdates = Object.keys(req.body);
@@ -210,6 +232,9 @@ groupRouter.patch('/:id', async (req, res) => {
   }
 });
 
+/**
+ * Delete a group in the database using its name as query string
+ */
 groupRouter.delete('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -231,6 +256,9 @@ groupRouter.delete('/', async (req, res) => {
   }  
 });
 
+/**
+ * Delete a group in the database using its ID
+ */
 groupRouter.delete('/:id', async (req, res) => {
   try {
     const group = await Group.findByIdAndDelete(req.params.id);

@@ -6,6 +6,10 @@ import { Challenge } from "../models/challenge";
 
 export const userRouter = express.Router();
 
+/**
+ * Check if an item exists in the database when its ID is going to use for create/modify a user, in this case the tracks, users and challenges.
+ * @param user User which tracks, users and challenges will be checked
+ */
 export async function checkItemsExists(user) {
 
   // Comprobar que los amigos existen en la base de datos.
@@ -53,6 +57,10 @@ export async function checkItemsExists(user) {
   }
 }
 
+/**
+ * When a user is deleted, this is deleted in the rest of the items that include it.
+ * @param user User that will be deleted in the rest of the items.
+ */
 export async function deleteInOtherObjects(user) {
 
   // Cuando se elimina un usuario también lo hace de los grupos a los que pertenezca.
@@ -84,6 +92,9 @@ export async function deleteInOtherObjects(user) {
   });
 }
 
+/**
+ * Get all the users in the database or only one if the query string name exists
+ */
 userRouter.get('/', async (req, res) => {
   const filter = req.query.name?{name: req.query.name.toString()}:{};
 
@@ -99,6 +110,9 @@ userRouter.get('/', async (req, res) => {
   }
 });
 
+/**
+ * Get a specify user according to its ID
+ */
 userRouter.get('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -112,6 +126,9 @@ userRouter.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * Create a user in the database
+ */
 userRouter.post('/', async (req, res) => {
   const user = new User(req.body);
 
@@ -124,6 +141,9 @@ userRouter.post('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a user in the database using its name as query string
+ */
 userRouter.patch('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -161,6 +181,9 @@ userRouter.patch('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a user in the database using its ID
+ */
 userRouter.patch('/:id', async (req, res) => {
   const allowedUpdates = ['name', 'activity', 'friends', 'friendsGroups', 'trainingStats', 'favoriteTracks', 'activeChallenges', 'trackHistory'];
   const actualUpdates = Object.keys(req.body);
@@ -190,6 +213,9 @@ userRouter.patch('/:id', async (req, res) => {
   }
 });
 
+/**
+ * Delete a user in the database using its name as query string
+ */
 userRouter.delete('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -214,6 +240,9 @@ userRouter.delete('/', async (req, res) => {
     }
 });
 
+/**
+ * Delete a user in the database using its ID
+ */
 userRouter.delete("/:id", async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
