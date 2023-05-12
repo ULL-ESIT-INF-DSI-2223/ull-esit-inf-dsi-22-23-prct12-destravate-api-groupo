@@ -4,39 +4,83 @@ import { User } from '../src/models/user';
 import { Group } from '../src/models/group';
 import { expect} from 'chai';
 
-const firstGroup = {
-  name: "Grupo de senderismo",
-  members: [
-
-  ],
-  favoriteTracks: [
-
-  ],
-  trackHistory: [
-    {
-      tracks: [
-
-      ],
-      date: "13-11-2021"
-    },    
-  ]
-}
-
-let groupID = '';
-
 beforeEach(async () => {
     await Group.deleteMany();
-    
-    const newGroup = await new Group(firstGroup).save();
-    groupID = newGroup._id.toString();
 });
 
 describe('POST /groups', () => {
   it('Should successfully create a new group', async () => {
+    const firstUser = {
+      name: 'UserTest1',
+      activity: 'bike',
+      friends: [],
+      friendsGroups: [{
+          name: 'GroupTest',
+          friends: [],
+      }],
+      trainingStats: {
+          weekly: {
+              length: 10,
+              uneveness: 130,
+          },
+          monthly: {
+              length: 23,
+              uneveness:302,
+          },
+          yearly: {
+              length: 320,
+              uneveness: 10002,
+          },
+      },
+      favoriteTracks: [],
+      activeChallenges: [],
+      trackHistory: [{
+          track: [],
+          date: '13-05-2021',
+      }],
+  }
+  let firstUserID = '';
+  const newFirstUser = await new User(firstUser).save();
+  firstUserID = newFirstUser._id.toString()
+
+  const secondUser = {
+    name: 'UserTest2',
+    activity: 'bike',
+    friends: [],
+    friendsGroups: [{
+        name: 'GroupTest',
+        friends: [],
+    }],
+    trainingStats: {
+        weekly: {
+            length: 10,
+            uneveness: 20,
+        },
+        monthly: {
+            length: 400,
+            uneveness: 10000,
+        },
+        yearly: {
+            length: 50000,
+            uneveness: 23000,
+        },
+    },
+    favoriteTracks: [],
+    activeChallenges: [],
+    trackHistory: [{
+        track: [],
+        date: '13-05-2021',
+    }],
+  }
+  let secondUserID = '';
+  const newSecondUser = await new User(secondUser).save();
+  secondUserID = newSecondUser._id.toString()
+
     const response = await request(app).post('/groups').send({
       name: "Grupo de senderismo 2",
       members: [
-    
+        firstUserID,
+        secondUserID
       ],
       favoriteTracks: [
     
@@ -57,6 +101,9 @@ describe('POST /groups', () => {
 
     const group = await Group.findById(response.body._id);
     expect(group).not.to.be.null;
+
+    // Comprueba que updateStats funciona correctamente, sumando las estadísticas de los usuarios que conforman el grupo.
+    expect(group?.groupStats.weekly.length).to.equal(20);
   });
 
   it('Should throw an 500 error when creating a group due to the name is not according the validator (Uso characters that are not alphanumeric)', async () => {
