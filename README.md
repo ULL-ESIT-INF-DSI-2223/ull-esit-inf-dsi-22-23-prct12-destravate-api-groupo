@@ -517,6 +517,9 @@ export async function deleteInOtherObjects(track) {
   });
 }
 
+/**
+ * Get all the tracks in the database or only one if the query string name exists
+ */
 trackRouter.get('/',  async (req, res) => {
   const filter = req.query.name?{name: req.query.name.toString()}:{};
 
@@ -532,6 +535,9 @@ trackRouter.get('/',  async (req, res) => {
   }  
 });
 
+/**
+ * Get a specify track according to its ID
+ */
 trackRouter.get('/:id', async (req, res) => {
   try {
     const track = await Track.findById(req.params.id); 
@@ -545,6 +551,9 @@ trackRouter.get('/:id', async (req, res) => {
   } 
 });
 
+/**
+ * Create a track in the database
+ */
 trackRouter.post('/', async (req, res) => {
   const track = new Track(req.body);
 
@@ -556,6 +565,9 @@ trackRouter.post('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a track in the database using its name as query string
+ */
 trackRouter.patch('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -592,6 +604,9 @@ trackRouter.patch('/', async (req, res) => {
   }
 });
 
+/**
+ * Modify a track in the database using its ID
+ */
 trackRouter.patch('/:id', async (req, res) => {  
   const allowedUpdates = ['name', 'startGeolocation', 'endGeolocation', 'length', 'unevenness', 'activity', 'rating'];
   const actualUpdates = Object.keys(req.body);
@@ -620,8 +635,9 @@ trackRouter.patch('/:id', async (req, res) => {
   }
 });
 
-
-
+/**
+ * Delete a track in the database using its name as query string
+ */
 trackRouter.delete('/', async (req, res) => {
   if (!req.query.name) {
     return res.status(400).send({
@@ -646,6 +662,9 @@ trackRouter.delete('/', async (req, res) => {
     }  
 });
 
+/**
+ * Delete a track in the database using its ID
+ */
 trackRouter.delete('/:id', async (req, res) => {
   try {
     const track = await Track.findByIdAndDelete(req.params.id);
@@ -713,6 +732,9 @@ Para todas las rutas se han realizado una gran cantidad de pruebas con el fin de
     ✔ Should delete the track from the group's favoriteTracks
 ```
 ### Challenges
+```Typescript
+
+```
 
 Las pruebas llevadas a cabo para _Challenges_ son las siguientes:
 ```
