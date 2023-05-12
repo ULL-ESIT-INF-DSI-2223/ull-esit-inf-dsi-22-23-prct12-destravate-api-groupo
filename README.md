@@ -433,19 +433,7 @@ app.use('/challenges', challengeRouter);
 /**
  * Show 404 error if access to a wrong path.
  */
-app.get('*', (_, res) => {
-  res.status(404).send();
-});
-
-app.post('*', (_, res) => {
-  res.status(404).send();
-});
-
-app.patch('*', (_, res) => {
-  res.status(404).send();
-});
-
-app.delete('*', (_, res) => {
+app.all('*', (_, res) => {
   res.status(404).send();
 });
 
@@ -704,6 +692,8 @@ Para todas las rutas se han realizado una gran cantidad de pruebas con el fin de
 ### User
 
 ### Group
+
+## Despliegue de la API en cyclic y MongoDB Atlas
 
 ## Conclusión
 Con la realización de este proyecto hemos aprendido a crear nuestra propia API REST, lo cual es fundamental en el desarrollo de aplicaciones, permitiendo que diferentes sistemas y aplicaciones se comuniquen de manera eficiente. También cómo se relaciona esta con una base de datos, en nuestro caso mongoose, donde hemos implementado las 4 funciones basicas (inserción, consulta, borrado y modificación). También hemos implementado el uso de async/await, lo que nos permite trabajar con código asíncrono de manera más legible.

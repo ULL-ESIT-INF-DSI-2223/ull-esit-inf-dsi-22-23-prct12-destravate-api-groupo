@@ -461,6 +461,49 @@ describe('DELETE /tracks', () => {
   });
 
   it('Should delete the track from the user\'s favoriteTracks', async () => {
+    const firstUser = {
+      name: "Pablo",
+      activity: "running",
+      friends: [
+        
+      ],
+      friendsGroups: [
+        {
+          name: "grupo1",
+          friends: [
+  
+          ]
+        }
+      ],
+      trainingStats: {
+        weekly: {
+          length: 1,
+          unevenness: 1
+        },
+        monthly: {
+          length: 2,
+          unevenness: 2
+        },
+        yearly: {
+          length: 3,
+          unevenness: 3
+          }
+        },
+      favoriteTracks: [
+        trackId
+      ],
+      activeChallenges: [
+      ],
+      trackHistory: [
+        {
+          tracks: [
+            trackId
+          ],
+          date: "13-11-2021"
+         }
+      ]
+    }  
+    await new User(firstUser).save();
     const userPre = await request(app).get('/users?name=Pablo');    
     await expect(userPre.body[0].favoriteTracks.length).to.equal(1);
     await request(app).delete(`/tracks/${trackId}`).expect(200);

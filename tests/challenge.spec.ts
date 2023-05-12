@@ -11,83 +11,6 @@ beforeEach(async () => {
   await Challenge.deleteMany();
   await User.deleteMany();
   await Group.deleteMany();
-
- 
-
-
- 
-
-  // const firstChallenge = {
-  //   name: "Exploracion Magica",
-  //   tracks: [
-  //     trackId
-  //   ],
-  //   activity: "running"
-  // }
-  // const newChallenge = await new Challenge(firstChallenge).save();
-  // const challengeId = newChallenge._id.toString();
-  // const firstUser = {
-  //   name: "Pablo",
-  //   activity: "running",
-  //   friends: [
-  //     trackId
-  //   ],
-  //   friendsGroups: [
-  //     {
-  //       name: "grupo1",
-  //       friends: [
-
-  //       ]
-  //     }
-  //   ],
-  //   trainingStats: {
-  //     weekly: {
-  //       length: 1,
-  //       unevenness: 1
-  //     },
-  //     monthly: {
-  //       length: 2,
-  //       unevenness: 2
-  //     },
-  //     yearly: {
-  //       length: 3,
-  //       unevenness: 3
-  //       }
-  //     },
-  //     favoriteTracks: [
-  //       trackId
-  //     ],
-  //     activeChallenges: [
-  //       challengeId
-  //     ],
-  //     trackHistory: [
-  //       {
-  //         tracks: [
-  //           trackId
-  //       ],
-  //         date: "13-11-2021"
-  //       }
-  //     ]
-  //   }  
-  // await new User(firstUser).save();
-  // const firstGroup = {
-  //   name: "Grupo de senderismo",
-  //   members: [
-
-  //   ],
-  //   favoriteTracks: [
-  //     trackId
-  //   ],
-  //   trackHistory: [
-  //     {
-  //       tracks: [
-  //         trackId
-  //       ],
-  //       date: "13-11-2021"
-  //     },    
-  //   ]
-  // }
-  // await new Group(firstGroup).save();
 });
 
 describe('POST /challenges', () => {
@@ -416,51 +339,7 @@ describe('DELETE /challenges', () => {
   };
       
   let challengeId = '';
-  
-  // const firstUser = {
-  //   name: "Pablo",
-  //   activity: "running",
-  //   friends: [
-      
-  //   ],
-  //   friendsGroups: [
-  //     {
-  //       name: "grupo1",
-  //       friends: [
-
-  //       ]
-  //     }
-  //   ],
-  //   trainingStats: {
-  //     weekly: {
-  //       length: 1,
-  //       unevenness: 1
-  //     },
-  //     monthly: {
-  //       length: 2,
-  //       unevenness: 2
-  //     },
-  //     yearly: {
-  //       length: 3,
-  //       unevenness: 3
-  //       }
-  //     },
-  //   favoriteTracks: [
-      
-  //   ],
-  //   activeChallenges: [
-  //     challengeId
-  //   ],
-  //   trackHistory: [
-  //     {
-  //       tracks: [
-          
-  //       ],
-  //       date: "13-11-2021"
-  //      }
-  //   ]
-  // }  
-  
+   
   it('Should successfully delete a challenge by name', async () => {
     await new Challenge(firstChallenge).save();
     await request(app).delete('/challenges?name=Primerchallenge').expect(200);

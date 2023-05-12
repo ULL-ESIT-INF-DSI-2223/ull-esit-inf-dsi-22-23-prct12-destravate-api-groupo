@@ -82,20 +82,6 @@ export async function deleteInOtherObjects(user) {
       await item.save();
     }
   });
-
-    // Cuando se elimina un usuario también lo hace de los grupos de amigos de otros usuarios.
-    const userFriendsGroup = await User.find({
-      friendsGroups: user._id,
-    });
-        
-    userFriendsGroup.forEach(async (item) => {
-      const index = item.friendsGroups.indexOf(user.id);
-  
-      if (index > -1) {
-        item.friendsGroups.splice(index, 1);
-        await item.save();
-      }
-    });
 }
 
 userRouter.get('/', async (req, res) => {

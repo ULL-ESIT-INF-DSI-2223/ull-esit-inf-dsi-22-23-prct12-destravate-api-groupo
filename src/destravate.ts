@@ -16,19 +16,7 @@ app.use('/challenges', challengeRouter);
 /**
  * Show 404 error if access to a wrong path.
  */
-app.get('*', (_, res) => {
-  res.status(404).send();
-});
-
-app.post('*', (_, res) => {
-  res.status(404).send();
-});
-
-app.patch('*', (_, res) => {
-  res.status(404).send();
-});
-
-app.delete('*', (_, res) => {
+app.all('*', (_, res) => {
   res.status(404).send();
 });
 
