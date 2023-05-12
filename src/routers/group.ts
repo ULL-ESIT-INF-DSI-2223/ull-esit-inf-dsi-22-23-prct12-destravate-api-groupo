@@ -97,7 +97,7 @@ export async function checkItemsExists(group) {
     }
   }
 
-  // Comprobar que las rutas favoritas del usuario existen en la base de datos.
+  // Comprobar que las rutas favoritas del grupo existen en la base de datos.
   for (let i = 0; i < group.favoriteTracks.length; i++) {
     const checkTrack = await Track.findById(group.favoriteTracks[i]);
     if (!checkTrack) {
