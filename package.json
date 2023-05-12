@@ -8,7 +8,8 @@
     "coverage": "nyc npm test && nyc report --reporter=lcov",
     "dev": "tsc-watch --onSuccess \"env-cmd -f ./config/dev.env node dist/destravate.js\"",
     "doc": "typedoc",
-    "start": "node dist/destravate.js"
+    "start": "node dist/destravate.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
