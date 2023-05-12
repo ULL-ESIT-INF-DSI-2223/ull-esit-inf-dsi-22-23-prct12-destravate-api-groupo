@@ -1,5 +1,5 @@
 # Práctica 12 - Destravate: API Node/Express
-Esta práctica consiste en la realización de una API REST, realizada mediante el uso de Node/Express, que nos perminte hacer las opereciones CRUD (_Create_, _Read_, _Update_, _Delete_), para registar actividades deportivas.
+Esta práctica consiste en la realización de una API REST, realizada mediante el uso de Node/Express, que nos permite hacer las operaciones CRUD (_Create_, _Read_, _Update_, _Delete_), para registrar actividades deportivas.
 \
 \
 Esta práctica se ha realizado en grupo por los siguientes alumnos:
@@ -104,7 +104,7 @@ export const TrackSchema = new Schema<TrackDocumentInterface>({
 
 export const Track = model<TrackDocumentInterface>('Track', TrackSchema);
 ```
-En el código anterior podemos ver primero la declaración de la interfaz y su posterior esquema, con todos los campos solicitados en el guion de la práctica. En le esquema se ha añadido además una serie de validadores gracias al módulo _validator_, para asegurarnos que a la hora de crear el objeto se introducen valores válidos, como que el nombre de la ruta deba de empezar por mayúscula y que solamente pueda usar caractéres alphanuméricos y espacios, además de que la longitud de la ruta y la pendiente debe de ser un número positivo y finalmente la clafisicación de la ruta debe de estar entre 0 y 10.
+En el código anterior podemos, ver primero la declaración de la interfaz y su posterior esquema, con todos los campos solicitados en el guion de la práctica. En el esquema se ha añadido además una serie de validadores gracias al módulo _validator_, para asegurarnos que a la hora de crear el objeto se introducen valores válidos, como que el nombre de la ruta deba de empezar por mayúscula y que solamente pueda usar caractéres alphanuméricos y espacios, además de que la longitud de la ruta y la pendiente debe de ser un número positivo y finalmente la clafisicación de la ruta debe de estar entre 0 y 10.
 ### Challenge
 ```TypeScript
 /**
@@ -307,7 +307,7 @@ export const UserSchema = new Schema<UserDocumentInterface>({
 
 export const User = model<UserDocumentInterface>("User", UserSchema);
 ```
-En el caso de los usuarios, al igual que en rutas y retos, declaramos la interfaz y su posterior esquema. Podemos ver que _friends_ y _activeChallenges_ son arrays de _ObjectId_, que hacen referencia a los documentos de _User_ y _Challenge_ respectivamente. Tenemos en el _id_ que si no se le pasa un valor, se le asigna un _ObjectId_ de mongoose. Además del validador del nombre, hemos añadido también en _trackHistory_ un validador para asegurarnos que la fecha tiene el formato correcto.
+En el caso de los usuarios, al igual que en rutas y retos, declaramos la interfaz y su posterior esquema. Podemos ver que _friends_ y _activeChallenges_ son arrays de _ObjectId_, que hacen referencia a los documentos de _User_ y _Challenge_ respectivamente. Tenemos en el _id_, que si no se le pasa un valor, se le asigna un _ObjectId_ de mongoose. Además del validador del nombre, hemos añadido también en _trackHistory_ un validador para asegurarnos que la fecha tiene el formato correcto.
 ### Group
 ```TypeScript
 /**
@@ -682,10 +682,10 @@ trackRouter.delete('/:id', async (req, res) => {
   }
 });
 ```
-Lo primero que observamos es una función _deleteInOtherObjects_ la cual es llamada cada vez que se elimina una ruta para así actualizar el resto de objetos que incluyen dicha ruta, siendo estos los retos, los usuarios y los grupos. A continuación se implementan las operaciones a través de los métodos HTTP, comenzando con el GET, donde mediante el filtro y una _query_ _string_ podemos seleccionar mostrar una ruta en concreto o todas las que se encuentran en la base de datos, también se ha incluido el get, donde la busqueda de la ruta se lleva a cabo por su identificador único dentro de la base de datos.
+Lo primero que observamos es una función _deleteInOtherObjects_ la cual es llamada cada vez que se elimina una ruta, para así actualizar el resto de objetos que incluyen dicha ruta, siendo estos los retos, los usuarios y los grupos. A continuación se implementan las operaciones a través de los métodos HTTP, comenzando con el GET, donde mediante el filtro y una _query_ _string_ podemos mostrar una ruta en concreto o todas las que se encuentran en la base de datos, también se ha incluido el get, donde la busqueda de la ruta se lleva a cabo por su identificador único dentro de la base de datos.
 \
 \
-En cuanto al POST, se recupero lo que ha introducido el usuario a través del body y si pasa todos los requisitos introducidos en el modelo, se añadirá la ruta a la base de datos. El PATCH sigue el mismo espíritu, primero tiene que encontrar la ruta que se desea modificar de distinta manera dependiendo si es con ID o mediante una _query string_, posteriormente se comprueba si los campos introducidos en el _body_ son aptos para la modificación, y si es así, se actualiza.
+En cuanto al POST, se recuperó lo que ha introducido el usuario a través del body y si pasa todos los requisitos introducidos en el modelo, se añadirá la ruta a la base de datos. El PATCH sigue el mismo espíritu, primero tiene que encontrar la ruta que se desea modificar de distinta manera dependiendo si es con ID o mediante una _query string_, posteriormente se comprueba si los campos introducidos en el _body_ son aptos para la modificación, y si es así, se actualiza.
 \
 \
 Finalmente tenemos el método DELETE, donde una vez más se lleva a cabo de las dos formas solicitadas y en ambas se llama a la función _deleteInOtherObjects_ para eliminar dicha ruta del resto de elementos, tal y como comentábamos anteriormente.
@@ -962,7 +962,7 @@ challengeRouter.delete('/:id', async (req, res) => {
 La primera función que encontramos es _updateKms_, que se encarga de actualizar los kilómetros de un reto. Para ello, se recorre el array de tracks del reto y se van sumando los kilómetros de cada uno de ellos. Una vez se ha terminado de recorrer el array, se actualiza el campo _kms_ del reto con el valor obtenido.
 \
 \
-La siguiente función es _checkItemsExists_, que se encarga de comprobar que que los tracks de un challenge existen en la base de datos. En caso de que no exista alguno, se lanza un error.
+La siguiente función es _checkItemsExists_, que se encarga de comprobar que los tracks de un challenge existen en la base de datos. En caso de que no exista alguno, se lanza un error.
 \
 \
 Tambien tememos _deleteInOtherObjects_, que se encarga de eliminar el reto de los usuarios que lo tienen como reto activo.
@@ -1659,7 +1659,7 @@ Para llevar a cabo el despliegue, lo primero es crear un clúster en MongoDB Atl
 ```
 mongodb+srv://DSI-API:dsiapi@cluster0.2my5da6.mongodb.net/destravate-app
 ```
-A continuación llevamos a cabo el despliegue en sí, en Cylic, donde también se han seguido los pasos indicados por el profesor para llevarlo a cabo. Tras registrarnos debemos de incluir el repositorio donde se encuentra nuestra aplicación y para vincularla a la base de datos de MongoDB Atlas debemos de definir la variable de entorno _MONGODB\_URL_ con la URL que habíamos obtenido anteriormente. Una vez hecho esto podremos ver en la pestaña _logs_ cómo se ha conectado correctamente y obtendremos una URL por la cual podremos llevar a cabo las peticiones en nuestro caso es la siguiente:
+A continuación llevamos a cabo el despliegue en sí, en Cylic, donde también se han seguido los pasos indicados por el profesor para llevarlo a cabo. Tras registrarnos debemos de incluir el repositorio donde se encuentra nuestra aplicación y para vincularla a la base de datos de MongoDB Atlas debemos de definir la variable de entorno _MONGODB\_URL_ con la URL que habíamos obtenido anteriormente. Una vez hecho esto podremos ver en la pestaña _logs_ cómo se ha conectado correctamente y obtendremos una URL por la cual podremos llevar a cabo las peticiones que en nuestro caso es la siguiente:
 ```
 https://lively-ox-cowboy-hat.cyclic.app/
 ```
@@ -1670,7 +1670,7 @@ Con la realización de este proyecto hemos aprendido a crear nuestra propia API 
 Tras todo el trabajo de desarrollo de la API-REST, documentación, pruebas, etc hemos realizado el despliegue, una parte que consideramos de gran valor, ya que nos permite ver nuestra aplicación en funcionamiento y cómo se relaciona con una base de datos en la nube (MonboDB Atlas) que configuramos anteriormente.
 \
 \
-En esta práctica tuvimos que realizar ciertas modificaciones en los workflows para conseguir que funcionara correctamente los flujos de trabajo con acciones de GitHub para integración continua, tanto para los tests, coveralls y sonar-cloud, tras los cambios pertinentes todo funciona correctamente, consiguiendo los siguientes _badgets_:
+En esta práctica tuvimos que realizar ciertas modificaciones en los workflows para conseguir que funcionaran correctamente los flujos de trabajo con acciones de GitHub para integración continua, tanto para los tests, coveralls y sonar-cloud, tras los cambios pertinentes todo funciona correctamente, consiguiendo los siguientes _badgets_:
 * Tests: [![Tests](https://github.com/ULL-ESIT-INF-DSI-2223/ull-esit-inf-dsi-22-23-prct12-destravate-api-groupo/actions/workflows/node.js.yml/badge.svg)](https://github.com/ULL-ESIT-INF-DSI-2223/ull-esit-inf-dsi-22-23-prct12-destravate-api-groupo/actions/workflows/node.js.yml)
 * Coveralls: [![Coverage Status](https://coveralls.io/repos/github/ULL-ESIT-INF-DSI-2223/ull-esit-inf-dsi-22-23-prct12-destravate-api-groupo/badge.svg?branch=main)](https://coveralls.io/github/ULL-ESIT-INF-DSI-2223/ull-esit-inf-dsi-22-23-prct12-destravate-api-groupo?branch=main)
 * Sonar-Cloud: [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ULL-ESIT-INF-DSI-2223_ull-esit-inf-dsi-22-23-prct12-destravate-api-groupo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ULL-ESIT-INF-DSI-2223_ull-esit-inf-dsi-22-23-prct12-destravate-api-groupo)
